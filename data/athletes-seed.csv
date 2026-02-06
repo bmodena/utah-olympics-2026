@@ -1,0 +1,82 @@
+name,sport,discipline,country,utahConnection,isParkCity,program
+Sam Morse,Alpine Skiing,Downhill,USA,Park City,TRUE,Not indicated
+Tallulah Proulx,Alpine Skiing,Giant Slalom,USA,Park City,TRUE,Park City Ski & Snowboard; The Winter Sports School
+Winston Tang,Alpine Skiing,Slalom,USA,Park City,TRUE,Park City Ski & Snowboard; The Winter Sports School
+Lindsey Vonn,Alpine Skiing,Downhill,USA,Park City,TRUE,Not indicated
+Isabella Wright,Alpine Skiing,Giant Slalom,USA,Park City,TRUE,Not indicated
+Caleb Furnell,Bobsleigh,Two-Man,USA,Park City,TRUE,Not indicated
+Rosie Brennan,Cross-Country Skiing,Sprint,USA,Park City,TRUE,Park City Ski & Snowboard; Park City School District
+Zoe Atkin,Freestyle Skiing,Halfpipe,GBR,Park City,TRUE,Park City Ski & Snowboard; The Winter Sports School; Park City School District
+Hunter Hess,Freestyle Skiing,Halfpipe,USA,Park City,TRUE,Not indicated
+Mac Forehand,Freestyle Skiing,Slopestyle,USA,Park City,TRUE,The Winter Sports School
+Alex Hall,Freestyle Skiing,Slopestyle,USA,Park City,TRUE,Park City Ski & Snowboard; The Winter Sports School
+Marin Hamill,Freestyle Skiing,Slopestyle,USA,Park City,TRUE,Park City Ski & Snowboard; The Winter Sports School; Park City School District; JANS
+Rell Harwood,Freestyle Skiing,Slopestyle,USA,Park City,TRUE,Park City Ski & Snowboard; The Winter Sports School
+Grace Henderson,Freestyle Skiing,Big Air,USA,Park City,TRUE,Not indicated
+Troy Podmilsak,Freestyle Skiing,Slopestyle,USA,Park City,TRUE,Park City Ski & Snowboard; Park City School District
+Connor Curran,Freestyle Skiing,Aerials,USA,Park City,TRUE,Park City Ski & Snowboard; YSA Scholarship Recipient
+Quinn Dehlinger,Freestyle Skiing,Aerials,USA,Park City,TRUE,Not indicated
+Kyra Dossa,Freestyle Skiing,Aerials,USA,Park City,TRUE,Park City Ski & Snowboard; YSA Scholarship Recipient
+Derek Krueger,Freestyle Skiing,Aerials,USA,Park City,TRUE,Park City Ski & Snowboard
+Kaila Kuhn,Freestyle Skiing,Aerials,USA,Park City,TRUE,Park City Ski & Snowboard
+Chris Lillis,Freestyle Skiing,Aerials,USA,Park City,TRUE,Not indicated
+Tasia Tanner,Freestyle Skiing,Aerials,USA,Park City,TRUE,Park City Ski & Snowboard
+Winter Vinecki,Freestyle Skiing,Aerials,USA,Park City,TRUE,Park City Ski & Snowboard; JANS
+Avital Carroll,Freestyle Skiing,Moguls,USA,Park City,TRUE,Wasatch Freestyle
+Olivia Giaccio,Freestyle Skiing,Moguls,USA,Park City,TRUE,Not indicated
+Tess Johnson,Freestyle Skiing,Moguls,USA,Park City,TRUE,Not indicated
+Charlie Mickel,Freestyle Skiing,Moguls,USA,Park City,TRUE,Wasatch Freestyle
+Nick Page,Freestyle Skiing,Moguls,USA,Park City,TRUE,Wasatch Freestyle; JANS
+Landon Wendler,Freestyle Skiing,Moguls,USA,Park City,TRUE,Wasatch Freestyle
+Ashley Farquharson,Luge,Women's Singles,USA,Park City,TRUE,Wasatch Luge Club; Park City School District; JANS; YSA Scholarship Recipient
+Matt Greiner,Luge,Men's Singles,USA,Park City,TRUE,Wasatch Luge Club; Park City School District; JANS; YSA Scholarship Recipient
+Ben Loomis,Nordic Combined,Individual,USA,Park City,TRUE,Park City Ski & Snowboard; The Winter Sports School
+Kevin Bickner,Ski Jumping,Individual,USA,Park City,TRUE,Park City Ski & Snowboard; The Winter Sports School; Park City School District
+Josie Johnson,Ski Jumping,Individual,USA,Park City,TRUE,Park City Ski & Snowboard; The Winter Sports School
+Paige Jones,Ski Jumping,Individual,USA,Park City,TRUE,Park City Ski & Snowboard; Park City School District
+Stacy Gaskill,Snowboard,Snowboard Cross,USA,Park City,TRUE,Not indicated
+Hanna Percy,Snowboard,Snowboard Cross,USA,Park City,TRUE,Not indicated
+Faye Thelen,Snowboard,Snowboard Cross,USA,Park City,TRUE,Not indicated
+Ethan Cepuran,Speed Skating,5000m,USA,Park City,TRUE,Not indicated
+Casey Dawson,Speed Skating,Team Pursuit,USA,Park City,TRUE,Park City Speed Skating Club; Park City School District; JANS
+Andrew Heo,Short Track Speed Skating,1500m,USA,Utah Olympic Oval,FALSE,US Speedskating - Utah
+Brandon Kim,Short Track Speed Skating,500m,USA,Utah Olympic Oval,FALSE,US Speedskating - Utah
+John-Henry Krueger,Short Track Speed Skating,1000m,HUN,Utah training,FALSE,Trained in Utah
+Ryan Pivirotto,Short Track Speed Skating,1500m,USA,Utah Olympic Oval,FALSE,US Speedskating - Utah
+Corinne Stoddard,Short Track Speed Skating,500m,USA,Utah Olympic Oval,FALSE,US Speedskating - Utah
+Eunice Lee,Short Track Speed Skating,1000m,USA,Utah Olympic Oval,FALSE,US Speedskating - Utah
+Jordan Stolz,Speed Skating,500m,USA,Utah Olympic Oval,FALSE,US Speedskating - Utah
+Erin Jackson,Speed Skating,500m,USA,Utah Olympic Oval,FALSE,US Speedskating - Utah
+Brittany Bowe,Speed Skating,1000m,USA,Utah Olympic Oval,FALSE,US Speedskating - Utah
+Joey Mantia,Speed Skating,Mass Start,USA,Utah Olympic Oval,FALSE,US Speedskating - Utah
+Kimi Goetz,Speed Skating,500m,USA,Utah Olympic Oval,FALSE,US Speedskating - Utah
+Patrick Meek,Speed Skating,10000m,USA,Utah Olympic Oval,FALSE,US Speedskating - Utah
+Steven Nyman,Alpine Skiing,Super-G,USA,Utah,FALSE,Sundance/Provo
+Luke Winters,Alpine Skiing,Slalom,USA,Utah,FALSE,University of Utah
+AJ Hurt,Alpine Skiing,Giant Slalom,USA,Utah,FALSE,Snowbird/Salt Lake
+Lauren Macuga,Alpine Skiing,Downhill,USA,Utah,FALSE,Snowbird/Salt Lake
+Jacqueline Wiles,Alpine Skiing,Downhill,USA,Utah,FALSE,Salt Lake City area
+Sean Hollander,Biathlon,Sprint,USA,Utah,FALSE,Utah Biathlon
+Clare Egan,Biathlon,Individual,USA,Utah,FALSE,Soldier Hollow
+Frank Del Duca,Bobsleigh,Four-Man,USA,Utah,FALSE,Utah Olympic Park
+Jimmy Reed,Bobsleigh,Two-Man,USA,Utah,FALSE,Utah Olympic Park
+Kaysha Love,Bobsleigh,Monobob,USA,Utah,FALSE,Utah Olympic Park
+Kaillie Humphries,Bobsleigh,Monobob,USA,Utah,FALSE,Utah Olympic Park - Salt Lake
+Andrew Blaser,Skeleton,Men's,USA,Utah,FALSE,Utah Olympic Park
+Katie Uhlaender,Skeleton,Women's,USA,Utah,FALSE,Utah Olympic Park
+Kelly Curtis,Skeleton,Women's,USA,Utah,FALSE,Utah Olympic Park
+Dustin Greenwald,Luge,Doubles,USA,Utah,FALSE,Utah Olympic Park
+Zack DiGregorio,Luge,Doubles,USA,Utah,FALSE,Utah Olympic Park
+Trent Stellingwerff,Nordic Combined,Individual,CAN,Park City training,FALSE,Trained at Utah Olympic Park
+Jacko Gill,Bobsleigh,Two-Man,NZL,Utah Olympic Park,FALSE,Trained at Utah Olympic Park
+Breezy Johnson,Alpine Skiing,Downhill,USA,Utah,FALSE,Salt Lake City
+Christopher Grotheer,Skeleton,Men's,GER,Utah ties,FALSE,Trained at Utah Olympic Park
+Marcus Kleveland,Snowboard,Slopestyle,NOR,Park City resident,FALSE,Trains in Park City
+Scotty James,Snowboard,Halfpipe,AUS,Park City resident,FALSE,Lives in Park City
+Anna Gasser,Snowboard,Big Air,AUT,Utah training,FALSE,Trains in Utah
+Ester Ledecka,Snowboard,Parallel Giant Slalom,CZE,Utah training,FALSE,Trains in Utah
+Daniel Andre Tande,Ski Jumping,Individual,NOR,Utah ties,FALSE,Competed at Utah Olympic Park
+Aljona Savchenko,Figure Skating,,GER,Utah training,FALSE,Trained in Utah
+Michael Martinez,Figure Skating,,PHI,Salt Lake City,FALSE,Trains in Salt Lake City
+Natalie Corless,Luge,Women's Singles,GBS,Park City training,FALSE,Trained in Park City
+Fayik Abdi,Cross-Country Skiing,Sprint,KSA,Park City training,FALSE,Trained in Park City

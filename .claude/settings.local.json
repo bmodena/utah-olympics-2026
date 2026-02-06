@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:rapidapi.com)",
+      "WebFetch(domain:www.olympics.com)",
+      "WebSearch",
+      "WebFetch(domain:www.ksl.com)",
+      "WebFetch(domain:utahsportscommission.com)",
+      "Bash(python3:*)",
+      "Bash(node:*)",
+      "Bash(node -c:*)",
+      "Bash(curl:*)"
+    ]
+  }
+}

@@ -1,0 +1,12 @@
+# Claude Code local settings
+  .claude/
+
+  # macOS
+  .DS_Store
+
+  # Editor files
+  *.swp
+  *.swo
+  *~
+  .vscode/
+  .idea/

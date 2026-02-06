@@ -1,0 +1,696 @@
+/* ===== Reset & Base ===== */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --olympic-blue: #0085c7;
+  --olympic-yellow: #f4c300;
+  --olympic-black: #1a1a2e;
+  --olympic-green: #009f3d;
+  --olympic-red: #df0024;
+  --park-city-accent: #2d6a4f;
+  --bg-primary: #f8f9fa;
+  --bg-card: #ffffff;
+  --bg-header: var(--olympic-blue);
+  --text-primary: #212529;
+  --text-secondary: #6c757d;
+  --text-light: #ffffff;
+  --border-color: #dee2e6;
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
+  --radius: 8px;
+  --radius-sm: 4px;
+}
+
+html {
+  font-size: 16px;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.5;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ===== Header ===== */
+.site-header {
+  background: linear-gradient(135deg, var(--olympic-blue) 0%, #003f7f 100%);
+  color: var(--text-light);
+  padding: 2rem 1.5rem;
+  text-align: center;
+}
+
+.site-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+}
+
+.site-subtitle {
+  font-size: 1rem;
+  opacity: 0.85;
+  font-weight: 400;
+}
+
+/* ===== Main Content ===== */
+.main-content {
+  flex: 1;
+  max-width: 960px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+/* ===== Controls Bar ===== */
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+}
+
+.filter-group {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.filter-btn,
+.sort-btn {
+  padding: 0.4rem 0.85rem;
+  border: 1px solid var(--border-color);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  font-size: 0.85rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.filter-btn:hover,
+.sort-btn:hover {
+  border-color: var(--olympic-blue);
+  color: var(--olympic-blue);
+}
+
+.filter-btn.active {
+  background: var(--olympic-blue);
+  color: var(--text-light);
+  border-color: var(--olympic-blue);
+}
+
+.sort-btn.active {
+  background: var(--olympic-black);
+  color: var(--text-light);
+  border-color: var(--olympic-black);
+}
+
+.sort-group {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.sort-label {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin-right: 0.25rem;
+}
+
+.search-group {
+  margin-left: auto;
+}
+
+.search-input {
+  padding: 0.4rem 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  width: 200px;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.search-input:focus {
+  border-color: var(--olympic-blue);
+  box-shadow: 0 0 0 2px rgba(0, 133, 199, 0.15);
+}
+
+/* ===== Status Bar ===== */
+.status-bar {
+  padding: 0.6rem 1rem;
+  margin-bottom: 1rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  background: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffc107;
+}
+
+.status-bar.error {
+  background: #f8d7da;
+  color: #721c24;
+  border-color: #f5c6cb;
+}
+
+.status-bar.info {
+  background: #d1ecf1;
+  color: #0c5460;
+  border-color: #bee5eb;
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* ===== Loading ===== */
+.loading {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--text-secondary);
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--border-color);
+  border-top-color: var(--olympic-blue);
+  border-radius: 50%;
+  margin: 0 auto 1rem;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ===== Schedule Container ===== */
+.schedule-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* ===== Date Group ===== */
+.date-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.date-header {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--olympic-black);
+  padding-bottom: 0.35rem;
+  border-bottom: 2px solid var(--olympic-blue);
+  position: sticky;
+  top: 0;
+  background: var(--bg-primary);
+  z-index: 10;
+  padding-top: 0.5rem;
+}
+
+/* ===== Event Card ===== */
+.event-card {
+  display: grid;
+  grid-template-columns: 90px 1fr;
+  gap: 0 1rem;
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  padding: 0.85rem 3rem 0.85rem 1rem;
+  box-shadow: var(--shadow-sm);
+  border-left: 3px solid var(--olympic-blue);
+  transition: box-shadow 0.15s ease;
+  position: relative;
+}
+
+.event-card:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.event-time {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--olympic-blue);
+  padding-top: 0.1rem;
+}
+
+.event-date-label {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-bottom: 0.1rem;
+}
+
+.event-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.event-sport {
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.event-name {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.event-athletes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-top: 0.3rem;
+}
+
+.athlete-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.15rem 0.5rem;
+  font-size: 0.78rem;
+  border-radius: 9999px;
+  background: #e8f4f8;
+  color: var(--olympic-blue);
+  font-weight: 500;
+}
+
+.athlete-tag.park-city {
+  background: #e8f5e9;
+  color: var(--park-city-accent);
+}
+
+.athlete-tag .badge {
+  font-size: 0.65rem;
+  padding: 0.05rem 0.3rem;
+  border-radius: 9999px;
+  background: var(--park-city-accent);
+  color: white;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.event-venue {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  margin-top: 0.15rem;
+}
+
+/* ===== Broadcast/TV Schedule ===== */
+.event-broadcast {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.3rem;
+  margin-top: 0.35rem;
+  padding: 0.3rem 0.5rem;
+  background: #f0f0f5;
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.broadcast-entry {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+.broadcast-network {
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.broadcast-time {
+  color: var(--text-secondary);
+}
+
+.broadcast-type {
+  display: inline-block;
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 0.05rem 0.35rem;
+  border-radius: 9999px;
+  background: #e0e0e0;
+  color: var(--text-secondary);
+}
+
+.broadcast-type.live {
+  background: var(--olympic-red);
+  color: white;
+}
+
+.broadcast-type.primetime {
+  background: var(--olympic-blue);
+  color: white;
+}
+
+.broadcast-type.delayed {
+  background: var(--olympic-yellow);
+  color: var(--olympic-black);
+}
+
+.broadcast-type.streaming {
+  background: #d1ecf1;
+  color: #0c5460;
+}
+
+.broadcast-sep {
+  color: var(--border-color);
+  margin: 0 0.15rem;
+}
+
+/* Event status indicators */
+.event-card.status-live {
+  border-left-color: var(--olympic-red);
+}
+
+.event-card.status-completed {
+  border-left-color: var(--text-secondary);
+  opacity: 0.75;
+}
+
+.status-indicator {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.1rem 0.4rem;
+  border-radius: var(--radius-sm);
+  margin-left: 0.5rem;
+}
+
+.status-indicator.live {
+  background: var(--olympic-red);
+  color: white;
+}
+
+.status-indicator.completed {
+  background: var(--text-secondary);
+  color: white;
+}
+
+/* ===== Medal Event Prominence ===== */
+.event-card:not(.qualifying) {
+  border-left: 3px solid var(--olympic-yellow);
+}
+
+/* ===== Qualifying Event (Collapsed) ===== */
+.event-card.qualifying {
+  padding: 0.5rem 3rem 0.5rem 1rem;
+  border-left: 3px solid var(--border-color);
+  cursor: pointer;
+  opacity: 0.8;
+}
+
+.event-card.qualifying:hover {
+  opacity: 1;
+}
+
+.event-card.qualifying .cal-action {
+  top: 0.35rem;
+}
+
+.event-card.qualifying .event-time {
+  display: flex;
+  align-items: center;
+  font-size: 0.8rem;
+}
+
+.event-card.qualifying .event-summary {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.event-card.qualifying .event-sport {
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+.event-name-inline {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+}
+
+.expand-toggle {
+  margin-left: auto;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  transition: transform 0.15s ease;
+}
+
+.expand-toggle::after {
+  content: '\25B8';
+}
+
+.event-card.qualifying.expanded .expand-toggle::after {
+  content: '\25BE';
+}
+
+.event-card.qualifying .event-expanded {
+  display: none;
+}
+
+.event-card.qualifying.expanded .event-expanded {
+  display: block;
+  margin-top: 0.5rem;
+}
+
+.event-card.qualifying.expanded {
+  opacity: 1;
+}
+
+/* Preserve status border colors on qualifying cards */
+.event-card.qualifying.status-live {
+  border-left-color: var(--olympic-red);
+}
+
+.event-card.qualifying.status-completed {
+  border-left-color: var(--text-secondary);
+}
+
+/* ===== Calendar Add Button ===== */
+.cal-action {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.5rem;
+}
+
+.cal-action.open {
+  z-index: 100;
+}
+
+.cal-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: none;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 0.25rem 0.5rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.cal-btn-label {
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.cal-btn-arrow {
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+  transition: transform 0.15s ease;
+}
+
+.cal-action.open .cal-btn-arrow {
+  transform: rotate(180deg);
+}
+
+.cal-btn:hover {
+  background: var(--bg-primary);
+  border-color: var(--olympic-blue);
+}
+
+.cal-btn:hover .cal-btn-label,
+.cal-btn:hover .cal-btn-arrow {
+  color: var(--olympic-blue);
+}
+
+.cal-dropdown {
+  display: none;
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 0.25rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-md);
+  min-width: 200px;
+  overflow: hidden;
+}
+
+.cal-action.open .cal-dropdown {
+  display: block;
+}
+
+.cal-dropdown-title {
+  padding: 0.5rem 0.75rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.cal-link {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.82rem;
+  color: var(--text-primary);
+  text-decoration: none;
+  transition: background 0.1s ease;
+}
+
+.cal-link:hover {
+  background: var(--bg-primary);
+}
+
+.cal-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: white;
+  flex-shrink: 0;
+}
+
+.cal-icon.cal-google { background: #4285f4; }
+.cal-icon.cal-outlook { background: #0078d4; }
+.cal-icon.cal-yahoo { background: #6001d2; }
+.cal-icon.cal-ics { background: #333; }
+
+/* ===== No Results ===== */
+.no-results {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--text-secondary);
+}
+
+.no-results h3 {
+  margin-bottom: 0.5rem;
+  font-size: 1.1rem;
+}
+
+/* ===== Footer ===== */
+.site-footer {
+  text-align: center;
+  padding: 1.5rem 1rem;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  border-top: 1px solid var(--border-color);
+  margin-top: 2rem;
+}
+
+/* ===== Sport Icons (emoji prefixes) ===== */
+/* Handled in JS via sportEmoji map */
+
+/* ===== Responsive ===== */
+@media (max-width: 640px) {
+  .site-header {
+    padding: 1.5rem 1rem;
+  }
+
+  .site-title {
+    font-size: 1.35rem;
+  }
+
+  .controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filter-group,
+  .sort-group {
+    justify-content: center;
+  }
+
+  .search-group {
+    margin-left: 0;
+  }
+
+  .search-input {
+    width: 100%;
+  }
+
+  .event-card {
+    grid-template-columns: 1fr;
+    gap: 0.35rem;
+  }
+
+  .event-time {
+    font-size: 0.8rem;
+  }
+
+  .event-card.qualifying .event-summary {
+    gap: 0.3rem;
+  }
+
+  .event-name-inline {
+    font-size: 0.78rem;
+  }
+
+  .cal-action {
+    top: 0.4rem;
+    right: 0.35rem;
+  }
+
+  .cal-btn-label {
+    display: none;
+  }
+
+  .cal-btn {
+    font-size: 0.78rem;
+    padding: 0.15rem 0.3rem;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 960px) {
+  .search-input {
+    width: 160px;
+  }
+}

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Utah at the 2026 Winter Olympics</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-content">
+      <h1 class="site-title">Utah at the 2026 Winter Olympics</h1>
+      <p class="site-subtitle">Track Utah &amp; Park City athletes in Milano Cortina</p>
+    </div>
+  </header>
+
+  <main class="main-content">
+    <div class="controls">
+      <div class="filter-group">
+        <button class="filter-btn active" data-filter="all">All Utah</button>
+        <button class="filter-btn" data-filter="parkCity">Park City Only</button>
+      </div>
+      <div class="sort-group">
+        <label class="sort-label">Sort by:</label>
+        <button class="sort-btn active" data-sort="date">Date</button>
+        <button class="sort-btn" data-sort="sport">Sport</button>
+        <button class="sort-btn" data-sort="athlete">Athlete</button>
+      </div>
+      <div class="search-group">
+        <input type="text" id="search-input" class="search-input" placeholder="Search athletes, sports, or networks...">
+      </div>
+    </div>
+
+    <div id="status-bar" class="status-bar hidden"></div>
+
+    <div id="schedule-container" class="schedule-container">
+      <div class="loading">
+        <div class="loading-spinner"></div>
+        <p>Loading schedule&hellip;</p>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <p>Data from Olympics.com &amp; local sources. Not affiliated with the IOC.</p>
+  </footer>
+
+  <script src="js/config.js"></script>
+  <script src="js/athletes.js"></script>
+  <script src="js/schedule.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
