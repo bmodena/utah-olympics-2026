@@ -1,0 +1,29 @@
+{
+  "streaming": {
+    "network": "Peacock",
+    "type": "streaming"
+  },
+  "sportNetworks": {
+    "Alpine Skiing": "USA Network",
+    "Biathlon": "CNBC",
+    "Bobsleigh": "USA Network",
+    "Cross-Country Skiing": "CNBC",
+    "Curling": "CNBC",
+    "Figure Skating": "NBC",
+    "Freestyle Skiing": "USA Network",
+    "Ice Hockey": "USA Network",
+    "Luge": "USA Network",
+    "Nordic Combined": "CNBC",
+    "Short Track Speed Skating": "NBC",
+    "Skeleton": "USA Network",
+    "Ski Jumping": "CNBC",
+    "Ski Mountaineering": "CNBC",
+    "Snowboard": "USA Network",
+    "Speed Skating": "USA Network"
+  },
+  "medalPrimetime": {
+    "network": "NBC",
+    "time": "19:00"
+  },
+  "eventOverrides": {}
+}

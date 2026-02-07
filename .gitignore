@@ -1,12 +1,18 @@
 # Claude Code local settings
-  .claude/
+.claude/
 
-  # macOS
-  .DS_Store
+# macOS
+.DS_Store
 
-  # Editor files
-  *.swp
-  *.swo
-  *~
-  .vscode/
-  .idea/
+# Editor files
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+
+# Vercel
+.vercel/
+
+# Node (if added later)
+node_modules/

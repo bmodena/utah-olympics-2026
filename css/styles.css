@@ -6,13 +6,13 @@
 }
 
 :root {
-  --olympic-blue: #0085c7;
+  --olympic-blue: #993820;
   --olympic-yellow: #f4c300;
   --olympic-black: #1a1a2e;
   --olympic-green: #009f3d;
   --olympic-red: #df0024;
   --park-city-accent: #2d6a4f;
-  --bg-primary: #f8f9fa;
+  --bg-primary: #f5f1eb;
   --bg-card: #ffffff;
   --bg-header: var(--olympic-blue);
   --text-primary: #212529;
@@ -21,40 +21,56 @@
   --border-color: #dee2e6;
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
-  --radius: 8px;
+  --radius: 4px;
   --radius-sm: 4px;
+}
+
+/* ===== Inline SVG Icons ===== */
+.icon {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  vertical-align: -0.125em;
+  flex-shrink: 0;
+}
+
+.icon-xs {
+  width: 0.7em;
+  height: 0.7em;
 }
 
 html {
   font-size: 16px;
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   background: var(--bg-primary);
   color: var(--text-primary);
   line-height: 1.5;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  -webkit-font-smoothing: antialiased;
 }
 
-/* ===== Header ===== */
+/* ===== Header (mobile-first) ===== */
 .site-header {
-  background: linear-gradient(135deg, var(--olympic-blue) 0%, #003f7f 100%);
+  background: linear-gradient(135deg, var(--olympic-blue) 0%, #6b2718 100%);
   color: var(--text-light);
-  padding: 2rem 1.5rem;
+  padding: 1.25rem 1rem;
   text-align: center;
 }
 
 .site-title {
-  font-size: 1.75rem;
+  font-size: 1.25rem;
   font-weight: 700;
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.15rem;
 }
 
 .site-subtitle {
-  font-size: 1rem;
+  font-size: 0.85rem;
   opacity: 0.85;
   font-weight: 400;
 }
@@ -65,17 +81,17 @@ body {
   max-width: 960px;
   width: 100%;
   margin: 0 auto;
-  padding: 1.5rem 1rem;
+  padding: 1rem 0.75rem;
 }
 
-/* ===== Controls Bar ===== */
+/* ===== Controls Bar (mobile-first: stacked) ===== */
 .controls {
   display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-  align-items: center;
-  margin-bottom: 1.5rem;
-  padding: 1rem;
+  flex-direction: column;
+  gap: 0.75rem;
+  align-items: stretch;
+  margin-bottom: 1rem;
+  padding: 0.75rem;
   background: var(--bg-card);
   border-radius: var(--radius);
   box-shadow: var(--shadow-sm);
@@ -84,11 +100,12 @@ body {
 .filter-group {
   display: flex;
   gap: 0.25rem;
+  justify-content: center;
 }
 
 .filter-btn,
 .sort-btn {
-  padding: 0.4rem 0.85rem;
+  padding: 0.45rem 0.85rem;
   border: 1px solid var(--border-color);
   background: var(--bg-card);
   color: var(--text-primary);
@@ -97,6 +114,7 @@ body {
   cursor: pointer;
   transition: all 0.15s ease;
   white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .filter-btn:hover,
@@ -121,6 +139,7 @@ body {
   display: flex;
   align-items: center;
   gap: 0.25rem;
+  justify-content: center;
 }
 
 .sort-label {
@@ -130,22 +149,23 @@ body {
 }
 
 .search-group {
-  margin-left: auto;
+  margin-left: 0;
 }
 
 .search-input {
-  padding: 0.4rem 0.75rem;
+  padding: 0.45rem 0.75rem;
   border: 1px solid var(--border-color);
   border-radius: var(--radius-sm);
-  font-size: 0.85rem;
-  width: 200px;
+  font-size: 1rem;
+  width: 100%;
   outline: none;
   transition: border-color 0.15s ease;
+  -webkit-appearance: none;
 }
 
 .search-input:focus {
   border-color: var(--olympic-blue);
-  box-shadow: 0 0 0 2px rgba(0, 133, 199, 0.15);
+  box-shadow: 0 0 0 2px rgba(153, 56, 32, 0.15);
 }
 
 /* ===== Status Bar ===== */
@@ -153,7 +173,7 @@ body {
   padding: 0.6rem 1rem;
   margin-bottom: 1rem;
   border-radius: var(--radius-sm);
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   background: #fff3cd;
   color: #856404;
   border: 1px solid #ffc107;
@@ -200,21 +220,21 @@ body {
 .schedule-container {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1.25rem;
 }
 
 /* ===== Date Group ===== */
 .date-group {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.4rem;
 }
 
 .date-header {
-  font-size: 1.1rem;
+  font-size: 1rem;
   font-weight: 700;
   color: var(--olympic-black);
-  padding-bottom: 0.35rem;
+  padding-bottom: 0.3rem;
   border-bottom: 2px solid var(--olympic-blue);
   position: sticky;
   top: 0;
@@ -223,14 +243,53 @@ body {
   padding-top: 0.5rem;
 }
 
-/* ===== Event Card ===== */
+/* Athlete view header */
+.athlete-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.3rem 0.5rem;
+}
+
+.athlete-header-name {
+  font-size: 1.1rem;
+}
+
+.athlete-header .badge {
+  font-size: 0.6rem;
+  padding: 0.05rem 0.3rem;
+  border-radius: 9999px;
+  background: var(--park-city-accent);
+  color: white;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  vertical-align: middle;
+}
+
+.athlete-country {
+  font-size: 0.8rem;
+  font-weight: 400;
+  color: var(--text-secondary);
+}
+
+.athlete-header-meta {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+/* ===== Event Card (mobile-first: single column) ===== */
 .event-card {
   display: grid;
-  grid-template-columns: 90px 1fr;
-  gap: 0 1rem;
+  grid-template-columns: 1fr;
+  gap: 0.3rem;
   background: var(--bg-card);
   border-radius: var(--radius);
-  padding: 0.85rem 3rem 0.85rem 1rem;
+  padding: 0.75rem 2.75rem 0.75rem 0.75rem;
   box-shadow: var(--shadow-sm);
   border-left: 3px solid var(--olympic-blue);
   transition: box-shadow 0.15s ease;
@@ -242,7 +301,7 @@ body {
 }
 
 .event-time {
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   font-weight: 600;
   color: var(--olympic-blue);
   padding-top: 0.1rem;
@@ -264,29 +323,38 @@ body {
 
 .event-sport {
   font-weight: 600;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.event-sport .icon {
+  width: 1.1em;
+  height: 1.1em;
+  color: var(--olympic-blue);
 }
 
 .event-name {
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   color: var(--text-secondary);
 }
 
 .event-athletes {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.35rem;
-  margin-top: 0.3rem;
+  gap: 0.3rem;
+  margin-top: 0.25rem;
 }
 
 .athlete-tag {
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
-  padding: 0.15rem 0.5rem;
-  font-size: 0.78rem;
+  padding: 0.2rem 0.5rem;
+  font-size: 0.75rem;
   border-radius: 9999px;
-  background: #e8f4f8;
+  background: #f5ebe8;
   color: var(--olympic-blue);
   font-weight: 500;
 }
@@ -297,7 +365,7 @@ body {
 }
 
 .athlete-tag .badge {
-  font-size: 0.65rem;
+  font-size: 0.6rem;
   padding: 0.05rem 0.3rem;
   border-radius: 9999px;
   background: var(--park-city-accent);
@@ -308,7 +376,7 @@ body {
 }
 
 .event-venue {
-  font-size: 0.78rem;
+  font-size: 0.75rem;
   color: var(--text-secondary);
   margin-top: 0.15rem;
 }
@@ -319,11 +387,17 @@ body {
   flex-wrap: wrap;
   align-items: center;
   gap: 0.3rem;
-  margin-top: 0.35rem;
+  margin-top: 0.3rem;
   padding: 0.3rem 0.5rem;
   background: #f0f0f5;
   border-radius: var(--radius-sm);
-  font-size: 0.75rem;
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+}
+
+.event-broadcast > .icon {
+  width: 1em;
+  height: 1em;
   color: var(--text-secondary);
 }
 
@@ -344,7 +418,7 @@ body {
 
 .broadcast-type {
   display: inline-block;
-  font-size: 0.65rem;
+  font-size: 0.6rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.03em;
@@ -391,7 +465,7 @@ body {
 
 .status-indicator {
   display: inline-block;
-  font-size: 0.7rem;
+  font-size: 0.65rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -417,7 +491,7 @@ body {
 
 /* ===== Qualifying Event (Collapsed) ===== */
 .event-card.qualifying {
-  padding: 0.5rem 3rem 0.5rem 1rem;
+  padding: 0.5rem 2.75rem 0.5rem 0.75rem;
   border-left: 3px solid var(--border-color);
   cursor: pointer;
   opacity: 0.8;
@@ -434,23 +508,23 @@ body {
 .event-card.qualifying .event-time {
   display: flex;
   align-items: center;
-  font-size: 0.8rem;
+  font-size: 0.78rem;
 }
 
 .event-card.qualifying .event-summary {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.35rem;
   flex-wrap: wrap;
 }
 
 .event-card.qualifying .event-sport {
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   white-space: nowrap;
 }
 
 .event-name-inline {
-  font-size: 0.82rem;
+  font-size: 0.78rem;
   color: var(--text-secondary);
 }
 
@@ -491,11 +565,71 @@ body {
   border-left-color: var(--text-secondary);
 }
 
+/* ===== Past Events (muted) ===== */
+.date-group.past-group .date-header {
+  color: var(--text-secondary);
+  border-bottom-color: var(--border-color);
+}
+
+.event-card.past-event {
+  opacity: 0.5;
+  background: #f0ede8;
+  border-left-color: #ccc !important;
+}
+
+.event-card.past-event:hover {
+  opacity: 0.7;
+}
+
+.event-card.past-event .event-time {
+  color: var(--text-secondary);
+}
+
+.event-card.past-event .event-sport,
+.event-card.past-event .event-sport .icon {
+  color: var(--text-secondary);
+}
+
+.event-card.past-event .athlete-tag {
+  background: #e8e6e3;
+  color: var(--text-secondary);
+}
+
+.event-card.past-event .athlete-tag.park-city {
+  background: #e0e5e0;
+  color: var(--text-secondary);
+}
+
+.event-card.past-event .athlete-tag .badge {
+  background: var(--text-secondary);
+}
+
+/* Today highlight */
+.date-group.today-group .date-header {
+  color: var(--olympic-blue);
+  border-bottom-color: var(--olympic-blue);
+  border-bottom-width: 3px;
+}
+
+.date-header .today-badge {
+  display: inline-block;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 0.1rem 0.45rem;
+  border-radius: var(--radius-sm);
+  background: var(--olympic-blue);
+  color: white;
+  margin-left: 0.5rem;
+  vertical-align: middle;
+}
+
 /* ===== Calendar Add Button ===== */
 .cal-action {
   position: absolute;
-  top: 0.6rem;
-  right: 0.5rem;
+  top: 0.5rem;
+  right: 0.35rem;
 }
 
 .cal-action.open {
@@ -505,32 +639,43 @@ body {
 .cal-btn {
   display: inline-flex;
   align-items: center;
-  gap: 0.3rem;
+  gap: 0.2rem;
   background: none;
   border: 1px solid var(--border-color);
   border-radius: var(--radius-sm);
-  padding: 0.25rem 0.5rem;
-  font-size: 0.85rem;
+  padding: 0.2rem 0.35rem;
+  font-size: 0.78rem;
   cursor: pointer;
   transition: all 0.15s ease;
   line-height: 1;
   white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .cal-btn-label {
-  font-size: 0.72rem;
-  font-weight: 500;
-  color: var(--text-secondary);
+  display: none;
 }
 
 .cal-btn-arrow {
-  font-size: 0.7rem;
   color: var(--text-secondary);
   transition: transform 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+}
+
+.cal-btn-arrow .icon {
+  width: 0.75em;
+  height: 0.75em;
 }
 
 .cal-action.open .cal-btn-arrow {
   transform: rotate(180deg);
+}
+
+.cal-btn > .icon {
+  width: 0.9em;
+  height: 0.9em;
+  color: var(--text-secondary);
 }
 
 .cal-btn:hover {
@@ -539,7 +684,8 @@ body {
 }
 
 .cal-btn:hover .cal-btn-label,
-.cal-btn:hover .cal-btn-arrow {
+.cal-btn:hover .cal-btn-arrow,
+.cal-btn:hover > .icon {
   color: var(--olympic-blue);
 }
 
@@ -555,6 +701,7 @@ body {
   box-shadow: var(--shadow-md);
   min-width: 200px;
   overflow: hidden;
+  z-index: 101;
 }
 
 .cal-action.open .cal-dropdown {
@@ -575,8 +722,8 @@ body {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.5rem 0.75rem;
-  font-size: 0.82rem;
+  padding: 0.6rem 0.75rem;
+  font-size: 0.85rem;
   color: var(--text-primary);
   text-decoration: none;
   transition: background 0.1s ease;
@@ -602,7 +749,15 @@ body {
 .cal-icon.cal-google { background: #4285f4; }
 .cal-icon.cal-outlook { background: #0078d4; }
 .cal-icon.cal-yahoo { background: #6001d2; }
-.cal-icon.cal-ics { background: #333; }
+.cal-icon.cal-ics {
+  background: #333;
+}
+
+.cal-icon.cal-ics .icon {
+  width: 0.8em;
+  height: 0.8em;
+  stroke: white;
+}
 
 /* ===== No Results ===== */
 .no-results {
@@ -619,78 +774,117 @@ body {
 /* ===== Footer ===== */
 .site-footer {
   text-align: center;
-  padding: 1.5rem 1rem;
-  font-size: 0.8rem;
+  padding: 1.25rem 1rem;
+  font-size: 0.75rem;
   color: var(--text-secondary);
   border-top: 1px solid var(--border-color);
   margin-top: 2rem;
 }
 
-/* ===== Sport Icons (emoji prefixes) ===== */
-/* Handled in JS via sportEmoji map */
-
-/* ===== Responsive ===== */
-@media (max-width: 640px) {
+/* ===== Tablet (641px+) ===== */
+@media (min-width: 641px) {
   .site-header {
-    padding: 1.5rem 1rem;
+    padding: 1.75rem 1.5rem;
   }
 
   .site-title {
-    font-size: 1.35rem;
+    font-size: 1.6rem;
+  }
+
+  .site-subtitle {
+    font-size: 0.95rem;
+  }
+
+  .main-content {
+    padding: 1.5rem 1rem;
   }
 
   .controls {
-    flex-direction: column;
-    align-items: stretch;
+    flex-direction: row;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
   }
 
   .filter-group,
   .sort-group {
-    justify-content: center;
+    justify-content: flex-start;
   }
 
   .search-group {
-    margin-left: 0;
+    margin-left: auto;
   }
 
   .search-input {
-    width: 100%;
+    width: 180px;
+    font-size: 0.85rem;
   }
 
   .event-card {
-    grid-template-columns: 1fr;
-    gap: 0.35rem;
+    grid-template-columns: 90px 1fr;
+    gap: 0 1rem;
+    padding: 0.85rem 3rem 0.85rem 1rem;
   }
 
-  .event-time {
-    font-size: 0.8rem;
-  }
-
-  .event-card.qualifying .event-summary {
-    gap: 0.3rem;
-  }
-
-  .event-name-inline {
-    font-size: 0.78rem;
+  .event-card.qualifying {
+    padding: 0.5rem 3rem 0.5rem 1rem;
   }
 
   .cal-action {
-    top: 0.4rem;
-    right: 0.35rem;
+    top: 0.6rem;
+    right: 0.5rem;
   }
 
-  .cal-btn-label {
-    display: none;
+  .event-card.qualifying .cal-action {
+    top: 0.35rem;
   }
 
   .cal-btn {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.85rem;
+    gap: 0.3rem;
+  }
+
+  .cal-btn-label {
+    display: inline;
+    font-size: 0.72rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+  }
+
+  .date-header {
+    font-size: 1.1rem;
+  }
+
+  .event-sport {
+    font-size: 0.95rem;
+  }
+
+  .event-name {
+    font-size: 0.85rem;
+  }
+
+  .athlete-tag {
     font-size: 0.78rem;
-    padding: 0.15rem 0.3rem;
+  }
+
+  .site-footer {
+    font-size: 0.8rem;
+    padding: 1.5rem 1rem;
   }
 }
 
-@media (min-width: 641px) and (max-width: 960px) {
+/* ===== Desktop (961px+) ===== */
+@media (min-width: 961px) {
+  .site-header {
+    padding: 2rem 1.5rem;
+  }
+
+  .site-title {
+    font-size: 1.75rem;
+  }
+
   .search-input {
-    width: 160px;
+    width: 220px;
   }
 }

@@ -9,7 +9,11 @@
       "Bash(python3:*)",
       "Bash(node:*)",
       "Bash(node -c:*)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(sips:*)",
+      "Bash(ls:*)",
+      "WebFetch(domain:odf.olympictech.org)",
+      "WebFetch(domain:www.teamusa.com)"
     ]
   }
 }

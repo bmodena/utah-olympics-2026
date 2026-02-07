@@ -16,8 +16,11 @@ var CONFIG = {
   GOOGLE_SHEET_ID: '1BSpyuxCaGM9kGMqT7Lrrx84LC3iRhglmA77Pe1q97eQ',
 
   // Paths
-  FALLBACK_SCHEDULE: 'data/schedule.json',
   FALLBACK_ATHLETES: 'data/athletes-full.csv',
+  BROADCAST_DATA: 'data/broadcast.json',
+
+  // Site URL
+  SITE_URL: 'https://utah2026.townlift.com',
 
   // Timezone display (auto-detected, but can be overridden)
   TIMEZONE: Intl.DateTimeFormat().resolvedOptions().timeZone

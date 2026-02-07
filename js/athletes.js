@@ -2,7 +2,7 @@
  * athletes.js - Fetch and parse athlete roster from Google Sheets or local CSV fallback.
  */
 var Athletes = (function () {
-  var CACHE_KEY = 'utah_olympics_athletes';
+  var CACHE_KEY = 'utah_olympics_athletes_v2';
 
   /**
    * Parse a CSV string into an array of objects.
@@ -78,7 +78,7 @@ var Athletes = (function () {
 
   /**
    * Normalize a parsed row into a standard athlete object.
-   * Handles columns: Sport, Athlete (or name), Discipline, Country, Connection, isParkCity, Program.
+   * Handles columns: Sport, Athlete (or name), Discipline, Country, Connection, isParkCity, Program, Status, Gender.
    */
   function normalizeAthlete(row) {
     return {
@@ -90,7 +90,9 @@ var Athletes = (function () {
       isParkCity: row.isparkcity
         ? row.isparkcity.toUpperCase() === 'TRUE'
         : false,
-      program: row.program || ''
+      program: row.program || '',
+      status: (row.status || 'active').toLowerCase().trim(),
+      gender: (row.gender || '').toUpperCase().trim().charAt(0) || ''
     };
   }
 
@@ -106,7 +108,7 @@ var Athletes = (function () {
       })
       .then(function (text) {
         var rows = parseCSV(text);
-        return rows.map(normalizeAthlete).filter(function (a) { return a.name; });
+        return rows.map(normalizeAthlete).filter(function (a) { return a.name && a.status === 'active'; });
       });
   }
 
@@ -121,7 +123,7 @@ var Athletes = (function () {
       })
       .then(function (text) {
         var rows = parseCSV(text);
-        return rows.map(normalizeAthlete).filter(function (a) { return a.name; });
+        return rows.map(normalizeAthlete).filter(function (a) { return a.name && a.status === 'active'; });
       });
   }
 
