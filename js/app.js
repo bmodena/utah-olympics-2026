@@ -70,23 +70,6 @@
   var downloadIcon = svg('<path d="M12 5v10"/><path d="M7 12l5 5 5-5"/><line x1="5" y1="20" x2="19" y2="20"/>');
   var chevronDown = '<svg class="icon icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>';
 
-  /**
-   * Determine if an event is qualifying/preliminary (not a medal event).
-   */
-  function isQualifyingEvent(eventName) {
-    var name = (eventName || '').toLowerCase();
-    var qualifiers = ['training', 'qualification', 'quarterfinal', 'semifinal',
-                      'heats', 'short program'];
-    for (var i = 0; i < qualifiers.length; i++) {
-      if (name.indexOf(qualifiers[i]) !== -1) return true;
-    }
-    // "Run 1 & 2" but NOT "Run 3 & 4 (Final)"
-    if (/run 1/i.test(name) && name.indexOf('final') === -1) return true;
-    // "Seeding" but not "Seeding & Finals"
-    if (name.indexOf('seeding') !== -1 && name.indexOf('finals') === -1) return true;
-    return false;
-  }
-
   // ---- Calendar helpers ----
 
   function pad2(n) { return n < 10 ? '0' + n : '' + n; }
@@ -453,82 +436,49 @@
 
         var timeDisplay = formatTime(evt.time, evt.date);
         var sportSvg = getSportIcon(evt.sport);
-        var qualifying = isQualifyingEvent(evt.event || evt.discipline || '');
+        var medalClass = evt.isMedalEvent ? ' medal-event' : '';
+        var medalBadge = evt.isMedalEvent ? '<span class="medal-indicator">' + medalIcon + '</span>' : '';
 
-        if (qualifying) {
-          // Compact collapsible card for qualifying events
-          html += '<div class="event-card qualifying' + statusClass + pastClass + '" onclick="this.classList.toggle(\'expanded\')">';
-          if (isAthleteView) {
-            html += '<div class="event-time"><span class="event-date-label">' + escapeHTML(formatDate(evt.date)) + '</span>' + escapeHTML(timeDisplay) + statusBadge + '</div>';
-          } else {
-            html += '<div class="event-time">' + escapeHTML(timeDisplay) + statusBadge + '</div>';
-          }
-          html += '<div class="event-details">';
-          html += '<div class="event-summary">';
-          html += '<span class="event-sport">' + sportSvg + ' ' + escapeHTML(evt.sport) + '</span>';
-          html += '<span class="event-name-inline">' + escapeHTML(evt.event || evt.discipline || '') + '</span>';
-          html += '<span class="expand-toggle"></span>';
-          html += '</div>';
-          html += '<div class="event-expanded">';
-          if (athleteTags) {
-            html += '<div class="event-athletes">' + athleteTags + '</div>';
-          }
-          if (evt.venue) {
-            html += '<div class="event-venue">' + escapeHTML(evt.venue) + '</div>';
-          }
-          if (evt.broadcast && evt.broadcast.length > 0) {
-            html += '<div class="event-broadcast">';
-            html += tvIcon + ' ';
-            evt.broadcast.forEach(function (b, i) {
-              if (i > 0) html += '<span class="broadcast-sep">|</span>';
-              html += '<span class="broadcast-entry">';
-              html += '<span class="broadcast-network">' + escapeHTML(b.network) + '</span> ';
-              if (b.time) {
-                html += '<span class="broadcast-time">' + formatBroadcastTime(b.time) + '</span> ';
-              }
-              var typeLabel = b.type === 'streaming' ? 'Stream' : b.type.charAt(0).toUpperCase() + b.type.slice(1);
-              html += '<span class="broadcast-type ' + escapeHTML(b.type) + '">' + escapeHTML(typeLabel) + '</span>';
-              html += '</span>';
-            });
-            html += '</div>';
-          }
-          html += '</div>'; // .event-expanded
-          html += '</div>'; // .event-details
-          html += buildCalendarHTML(evt);
-          html += '</div>'; // .event-card
-        } else {
-          // Full medal/finals event card
-          html += '<div class="event-card' + statusClass + pastClass + '">';
+        // All events use unified collapsible card
+        html += '<div class="event-card' + medalClass + statusClass + pastClass + '" onclick="this.classList.toggle(\'expanded\')">';
+        if (isAthleteView || currentSort !== 'date') {
           html += '<div class="event-time"><span class="event-date-label">' + escapeHTML(formatDate(evt.date)) + '</span>' + escapeHTML(timeDisplay) + statusBadge + '</div>';
-          html += '<div class="event-details">';
-          html += '<div class="event-sport">' + sportSvg + ' ' + escapeHTML(evt.sport) + '</div>';
-          html += '<div class="event-name">' + escapeHTML(evt.event || evt.discipline || '') + '</div>';
-          if (athleteTags) {
-            html += '<div class="event-athletes">' + athleteTags + '</div>';
-          }
-          if (evt.venue) {
-            html += '<div class="event-venue">' + escapeHTML(evt.venue) + '</div>';
-          }
-          if (evt.broadcast && evt.broadcast.length > 0) {
-            html += '<div class="event-broadcast">';
-            html += tvIcon + ' ';
-            evt.broadcast.forEach(function (b, i) {
-              if (i > 0) html += '<span class="broadcast-sep">|</span>';
-              html += '<span class="broadcast-entry">';
-              html += '<span class="broadcast-network">' + escapeHTML(b.network) + '</span> ';
-              if (b.time) {
-                html += '<span class="broadcast-time">' + formatBroadcastTime(b.time) + '</span> ';
-              }
-              var typeLabel = b.type === 'streaming' ? 'Stream' : b.type.charAt(0).toUpperCase() + b.type.slice(1);
-              html += '<span class="broadcast-type ' + escapeHTML(b.type) + '">' + escapeHTML(typeLabel) + '</span>';
-              html += '</span>';
-            });
-            html += '</div>';
-          }
-          html += '</div>'; // .event-details
-          html += buildCalendarHTML(evt);
-          html += '</div>'; // .event-card
+        } else {
+          html += '<div class="event-time">' + escapeHTML(timeDisplay) + statusBadge + '</div>';
         }
+        html += '<div class="event-details">';
+        html += '<div class="event-summary">';
+        html += '<span class="event-name-inline">' + escapeHTML(evt.event || evt.discipline || '') + '</span>';
+        html += '<span class="event-sport-label">' + escapeHTML(evt.sport) + '</span>';
+        html += '<span class="expand-toggle"></span>';
+        html += '</div>';
+        html += '<div class="event-expanded">';
+        if (athleteTags) {
+          html += '<div class="event-athletes"><span class="athletes-label">Utah athletes qualified for this event (may not have advanced to finals):</span>' + athleteTags + '</div>';
+        }
+        if (evt.venue) {
+          html += '<div class="event-venue">' + escapeHTML(evt.venue) + '</div>';
+        }
+        if (evt.broadcast && evt.broadcast.length > 0) {
+          html += '<div class="event-broadcast">';
+          html += tvIcon + ' ';
+          evt.broadcast.forEach(function (b, i) {
+            if (i > 0) html += '<span class="broadcast-sep">|</span>';
+            html += '<span class="broadcast-entry">';
+            html += '<span class="broadcast-network">' + escapeHTML(b.network) + '</span> ';
+            if (b.time) {
+              html += '<span class="broadcast-time">' + formatBroadcastTime(b.time) + '</span> ';
+            }
+            var typeLabel = b.type === 'streaming' ? 'Stream' : b.type.charAt(0).toUpperCase() + b.type.slice(1);
+            html += '<span class="broadcast-type ' + escapeHTML(b.type) + '">' + escapeHTML(typeLabel) + '</span>';
+            html += '</span>';
+          });
+          html += '</div>';
+        }
+        html += '</div>'; // .event-expanded
+        html += '</div>'; // .event-details
+        html += buildCalendarHTML(evt);
+        html += '</div>'; // .event-card
       });
 
       html += '</div>';

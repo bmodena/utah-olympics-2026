@@ -231,7 +231,7 @@ body {
 }
 
 .date-header {
-  font-size: 1rem;
+  font-size: 1.35rem;
   font-weight: 700;
   color: var(--olympic-black);
   padding-bottom: 0.3rem;
@@ -345,6 +345,17 @@ body {
   flex-wrap: wrap;
   gap: 0.3rem;
   margin-top: 0.25rem;
+}
+
+.athletes-label {
+  display: block;
+  width: 100%;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin-bottom: 0.1rem;
 }
 
 .athlete-tag {
@@ -484,48 +495,39 @@ body {
   color: white;
 }
 
-/* ===== Medal Event Prominence ===== */
-.event-card:not(.qualifying) {
-  border-left: 3px solid var(--olympic-yellow);
-}
-
-/* ===== Qualifying Event (Collapsed) ===== */
-.event-card.qualifying {
-  padding: 0.5rem 2.75rem 0.5rem 0.75rem;
-  border-left: 3px solid var(--border-color);
+/* ===== All Events — Collapsed by Default ===== */
+.event-card {
   cursor: pointer;
-  opacity: 0.8;
+  padding: 0.5rem 2.75rem 0.5rem 0.75rem;
 }
 
-.event-card.qualifying:hover {
-  opacity: 1;
-}
-
-.event-card.qualifying .cal-action {
-  top: 0.35rem;
-}
-
-.event-card.qualifying .event-time {
+.event-card .event-time {
   display: flex;
   align-items: center;
   font-size: 0.78rem;
 }
 
-.event-card.qualifying .event-summary {
+.event-card .event-summary {
   display: flex;
   align-items: center;
   gap: 0.35rem;
   flex-wrap: wrap;
 }
 
-.event-card.qualifying .event-sport {
-  font-size: 0.82rem;
-  white-space: nowrap;
+.event-name-inline {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
 }
 
-.event-name-inline {
-  font-size: 0.78rem;
+.event-sport-label {
+  font-size: 0.85rem;
   color: var(--text-secondary);
+  font-weight: 400;
+}
+
+.event-sport-label::before {
+  content: '\2014\00a0';
 }
 
 .expand-toggle {
@@ -539,29 +541,57 @@ body {
   content: '\25B8';
 }
 
-.event-card.qualifying.expanded .expand-toggle::after {
+.event-card.expanded .expand-toggle::after {
   content: '\25BE';
 }
 
-.event-card.qualifying .event-expanded {
+.event-card .event-expanded {
   display: none;
 }
 
-.event-card.qualifying.expanded .event-expanded {
+.event-card.expanded .event-expanded {
   display: block;
   margin-top: 0.5rem;
 }
 
-.event-card.qualifying.expanded {
-  opacity: 1;
+.event-card .cal-action {
+  top: 0.35rem;
 }
 
-/* Preserve status border colors on qualifying cards */
-.event-card.qualifying.status-live {
+/* ===== Medal Event Styling ===== */
+.event-card.medal-event {
+  border-left: 3px solid var(--olympic-yellow);
+}
+
+.event-card.medal-event .event-name-inline {
+  color: var(--text-primary);
+  font-weight: 700;
+}
+
+.medal-indicator {
+  display: inline-flex;
+  align-items: center;
+  color: #d4a017;
+  margin-right: 0.25rem;
+  vertical-align: middle;
+}
+
+.medal-indicator .icon {
+  width: 1em;
+  height: 1em;
+}
+
+/* Non-medal events get subtle border */
+.event-card:not(.medal-event) {
+  border-left: 3px solid var(--border-color);
+}
+
+/* Status border overrides */
+.event-card.status-live {
   border-left-color: var(--olympic-red);
 }
 
-.event-card.qualifying.status-completed {
+.event-card.status-completed {
   border-left-color: var(--text-secondary);
 }
 
@@ -781,6 +811,24 @@ body {
   margin-top: 2rem;
 }
 
+.footer-links {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.footer-links a {
+  color: var(--olympic-blue);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.8rem;
+}
+
+.footer-links a:hover {
+  text-decoration: underline;
+}
+
 /* ===== Tablet (641px+) ===== */
 @media (min-width: 641px) {
   .site-header {
@@ -823,10 +871,6 @@ body {
   .event-card {
     grid-template-columns: 90px 1fr;
     gap: 0 1rem;
-    padding: 0.85rem 3rem 0.85rem 1rem;
-  }
-
-  .event-card.qualifying {
     padding: 0.5rem 3rem 0.5rem 1rem;
   }
 
@@ -835,9 +879,6 @@ body {
     right: 0.5rem;
   }
 
-  .event-card.qualifying .cal-action {
-    top: 0.35rem;
-  }
 
   .cal-btn {
     padding: 0.25rem 0.5rem;
@@ -853,15 +894,15 @@ body {
   }
 
   .date-header {
+    font-size: 1.5rem;
+  }
+
+  .event-name-inline {
     font-size: 1.1rem;
   }
 
-  .event-sport {
-    font-size: 0.95rem;
-  }
-
-  .event-name {
-    font-size: 0.85rem;
+  .event-sport-label {
+    font-size: 0.9rem;
   }
 
   .athlete-tag {

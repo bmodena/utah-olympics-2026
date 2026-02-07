@@ -2,7 +2,7 @@
  * athletes.js - Fetch and parse athlete roster from Google Sheets or local CSV fallback.
  */
 var Athletes = (function () {
-  var CACHE_KEY = 'utah_olympics_athletes_v2';
+  var CACHE_KEY = 'utah_olympics_athletes_v3';
 
   /**
    * Parse a CSV string into an array of objects.
@@ -92,7 +92,8 @@ var Athletes = (function () {
         : false,
       program: row.program || '',
       status: (row.status || 'active').toLowerCase().trim(),
-      gender: (row.gender || '').toUpperCase().trim().charAt(0) || ''
+      gender: (row.gender || '').toUpperCase().trim().charAt(0) || '',
+      events: (row.events || '').split(';').map(function (e) { return e.trim(); }).filter(Boolean)
     };
   }
 

@@ -190,8 +190,8 @@ var Schedule = (function () {
         broadcast: []
       };
     }).filter(function (e) {
-      // Drop events still classified as unknown (no Utah athlete will match)
-      return e.sport !== 'unknown';
+      // Only keep medal events; drop training, qualifiers, and unknown sports
+      return e.sport !== 'unknown' && e.isMedalEvent;
     });
   }
 
@@ -382,9 +382,20 @@ var Schedule = (function () {
         });
       }
 
-      if (evt.discipline && matched.length > 0) {
-        var evtDisc = evt.discipline.toLowerCase().trim();
+      if (matched.length > 0) {
+        var evtDisc = (evt.discipline || '').toLowerCase().trim();
+        var evtEvent = (evt.event || '').toLowerCase().trim();
+        var evtText = evtDisc + ' ' + evtEvent;
+
         var narrowed = matched.filter(function (ath) {
+          // Use events array for precise matching if available
+          if (ath.events && ath.events.length > 0) {
+            return ath.events.some(function (ev) {
+              return evtText.indexOf(ev.toLowerCase()) !== -1;
+            });
+          }
+
+          // Fallback to discipline-based matching
           var athSportLower = ath.sport.toLowerCase().trim();
           var athDiscLower = (ath.discipline || '').toLowerCase().trim();
 
