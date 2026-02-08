@@ -6,6 +6,7 @@
   var allEvents = [];
   var currentSort = 'date';  // 'date' | 'sport' | 'athlete'
   var searchQuery = '';
+  var showPast = false;
   var initialScrollDone = false;
   var athleteInfoMap = {}; // populated by groupEvents in athlete mode
 
@@ -36,6 +37,8 @@
     }
   }
 
+  var VIEW_LABELS = { date: 'Date', sport: 'Sport', athlete: 'Athlete' };
+
   function syncSortButtons() {
     var btns = document.querySelectorAll('.sort-btn');
     btns.forEach(function (b) {
@@ -45,6 +48,10 @@
         b.classList.remove('active');
       }
     });
+    var summaryVal = document.getElementById('controls-summary-value');
+    if (summaryVal) {
+      summaryVal.textContent = VIEW_LABELS[currentSort] || 'Date';
+    }
   }
 
   /**
@@ -323,6 +330,14 @@
    */
   function getFilteredEvents() {
     var events = allEvents;
+
+    // Hide past events unless toggled on
+    if (!showPast) {
+      var today = getTodayStr();
+      events = events.filter(function (evt) {
+        return (evt.date || '') >= today;
+      });
+    }
 
     // Search
     if (searchQuery) {
@@ -627,6 +642,7 @@
         btns.forEach(function (b) { b.classList.remove('active'); });
         btn.classList.add('active');
         currentSort = btn.dataset.sort;
+        syncSortButtons();
         updateHash(currentSort);
         track('sort_change', { sort_by: currentSort });
         render();
@@ -690,6 +706,24 @@
         syncSortButtons();
         render();
       }
+    });
+
+    // Mobile controls toggle
+    var controlsEl = document.getElementById('controls');
+    var controlsToggle = document.getElementById('controls-toggle');
+    var controlsSummary = document.getElementById('controls-summary');
+    controlsSummary.addEventListener('click', function () {
+      controlsEl.classList.toggle('open');
+    });
+
+    // Past events toggle
+    var pastBtn = document.getElementById('past-toggle');
+    pastBtn.addEventListener('click', function () {
+      showPast = !showPast;
+      pastBtn.textContent = showPast ? 'Hide past events' : 'Show past events';
+      pastBtn.classList.toggle('active', showPast);
+      track('toggle_past_events', { show_past: showPast });
+      render();
     });
 
     // Close calendar dropdowns on outside click

@@ -27,7 +27,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css?v=11">
+  <link rel="stylesheet" href="css/styles.css?v=13">
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-T2RPDQ96M7"></script>
   <script>
@@ -70,15 +70,32 @@
   </header>
 
   <main class="main-content">
-    <div class="controls">
-      <div class="sort-group">
-        <label class="sort-label">Sort by:</label>
-        <button class="sort-btn active" data-sort="date">Date</button>
-        <button class="sort-btn" data-sort="sport">Sport</button>
-        <button class="sort-btn" data-sort="athlete">Athlete</button>
+    <div class="disclosure">
+      This tool aggregates data from multiple sources to track Park City athletes at the 2026 Winter Olympics. Only medal events are listed; qualifying rounds and heats are not currently included. Information has not been independently verified and may contain errors. See an issue? Email <a href="mailto:info@townlift.com">info@townlift.com</a> and we'll work to correct it.
+    </div>
+
+    <div class="controls" id="controls">
+      <div class="controls-summary" id="controls-summary">
+        <span class="controls-summary-text">
+          <span class="controls-summary-label">View:</span>
+          <span class="controls-summary-value" id="controls-summary-value">Date</span>
+        </span>
+        <button class="controls-toggle" id="controls-toggle" aria-label="Toggle filters">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="20" y2="12"/><line x1="12" y1="18" x2="20" y2="18"/></svg>
+          Filters
+        </button>
       </div>
-      <div class="search-group">
-        <input type="text" id="search-input" class="search-input" placeholder="Search athletes, sports, or networks...">
+      <div class="controls-expanded" id="controls-expanded">
+        <div class="sort-group">
+          <label class="sort-label">Sort by:</label>
+          <button class="sort-btn active" data-sort="date">Date</button>
+          <button class="sort-btn" data-sort="sport">Sport</button>
+          <button class="sort-btn" data-sort="athlete">Athlete</button>
+        </div>
+        <button class="past-toggle" id="past-toggle">Show past events</button>
+        <div class="search-group">
+          <input type="text" id="search-input" class="search-input" placeholder="Search athletes, sports, or networks...">
+        </div>
       </div>
     </div>
 
@@ -101,9 +118,9 @@
     <p>Not affiliated with the IOC or any National Olympic Committee.</p>
   </footer>
 
-  <script src="js/config.js?v=11"></script>
-  <script src="js/athletes.js?v=11"></script>
-  <script src="js/schedule.js?v=11"></script>
-  <script src="js/app.js?v=11"></script>
+  <script src="js/config.js?v=13"></script>
+  <script src="js/athletes.js?v=13"></script>
+  <script src="js/schedule.js?v=13"></script>
+  <script src="js/app.js?v=13"></script>
 </body>
 </html>

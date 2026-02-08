@@ -177,6 +177,28 @@ body {
   display: block;
 }
 
+/* ===== Disclosure ===== */
+.disclosure {
+  font-size: 0.72rem;
+  line-height: 1.45;
+  color: var(--text-secondary);
+  background: #f0ede8;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  padding: 0.5rem 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.disclosure a {
+  color: var(--olympic-blue);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.disclosure a:hover {
+  text-decoration: underline;
+}
+
 /* ===== Main Content ===== */
 .main-content {
   flex: 1;
@@ -186,17 +208,79 @@ body {
   padding: 1rem 0.75rem;
 }
 
-/* ===== Controls Bar (mobile-first: stacked) ===== */
+/* ===== Controls Bar (mobile-first: collapsed) ===== */
 .controls {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  align-items: stretch;
   margin-bottom: 1rem;
-  padding: 0.75rem;
   background: var(--bg-card);
   border-radius: var(--radius);
   box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+.controls-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.6rem 0.75rem;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.controls-summary-text {
+  font-size: 0.82rem;
+  color: var(--text-primary);
+}
+
+.controls-summary-label {
+  color: var(--text-secondary);
+  margin-right: 0.25rem;
+}
+
+.controls-summary-value {
+  font-weight: 600;
+}
+
+.controls-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: none;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 0.3rem 0.6rem;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.controls-toggle svg {
+  width: 0.85rem;
+  height: 0.85rem;
+}
+
+.controls-toggle:hover {
+  border-color: var(--olympic-blue);
+  color: var(--olympic-blue);
+}
+
+.controls.open .controls-toggle {
+  background: var(--olympic-black);
+  color: var(--text-light);
+  border-color: var(--olympic-black);
+}
+
+.controls-expanded {
+  display: none;
+  flex-direction: column;
+  gap: 0.75rem;
+  align-items: stretch;
+  padding: 0 0.75rem 0.75rem;
+}
+
+.controls.open .controls-expanded {
+  display: flex;
 }
 
 .filter-group {
@@ -248,6 +332,30 @@ body {
   font-size: 0.85rem;
   color: var(--text-secondary);
   margin-right: 0.25rem;
+}
+
+.past-toggle {
+  padding: 0.35rem 0.7rem;
+  border: 1px solid var(--border-color);
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.past-toggle:hover {
+  border-color: var(--olympic-blue);
+  color: var(--olympic-blue);
+}
+
+.past-toggle.active {
+  background: var(--text-secondary);
+  color: var(--text-light);
+  border-color: var(--text-secondary);
 }
 
 .search-group {
@@ -678,30 +786,7 @@ body {
 
 /* ===== Medal Event Styling ===== */
 .event-card.medal-event {
-  border-left: 3px solid var(--olympic-yellow);
-}
-
-.event-card.medal-event .event-name-inline {
-  color: var(--text-primary);
-  font-weight: 700;
-}
-
-.medal-indicator {
-  display: inline-flex;
-  align-items: center;
-  color: #d4a017;
-  margin-right: 0.25rem;
-  vertical-align: middle;
-}
-
-.medal-indicator .icon {
-  width: 1em;
-  height: 1em;
-}
-
-/* Non-medal events get subtle border */
-.event-card:not(.medal-event) {
-  border-left: 3px solid var(--border-color);
+  border-left: 3px solid var(--olympic-blue);
 }
 
 /* Status border overrides */
@@ -1082,7 +1167,12 @@ body {
     padding: 1.5rem 1rem;
   }
 
-  .controls {
+  .controls-summary {
+    display: none;
+  }
+
+  .controls-expanded {
+    display: flex;
     flex-direction: row;
     align-items: center;
     gap: 1rem;
