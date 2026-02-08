@@ -2,7 +2,12 @@
  * athletes.js - Fetch and parse athlete roster from Google Sheets or local CSV fallback.
  */
 var Athletes = (function () {
-  var CACHE_KEY = 'utah_olympics_athletes_v4';
+  var CACHE_KEY = 'utah_olympics_athletes_v5';
+  var CACHE_TTL = 60 * 60 * 1000; // 1 hour
+
+  function forceRefresh() {
+    return window.location.search.indexOf('refresh') !== -1;
+  }
 
   /**
    * Parse a CSV string into an array of objects.
@@ -133,13 +138,18 @@ var Athletes = (function () {
    * Caches result in sessionStorage.
    */
   function fetchAthletes() {
-    // Check cache
-    try {
-      var cached = sessionStorage.getItem(CACHE_KEY);
-      if (cached) {
-        return Promise.resolve(JSON.parse(cached));
-      }
-    } catch (e) { /* ignore */ }
+    // Check localStorage cache with TTL
+    if (!forceRefresh()) {
+      try {
+        var raw = localStorage.getItem(CACHE_KEY);
+        if (raw) {
+          var cached = JSON.parse(raw);
+          if (Date.now() - cached.timestamp < CACHE_TTL) {
+            return Promise.resolve(cached.data);
+          }
+        }
+      } catch (e) { /* ignore */ }
+    }
 
     var sheetId = CONFIG.GOOGLE_SHEET_ID;
     var promise;
@@ -154,9 +164,12 @@ var Athletes = (function () {
     }
 
     return promise.then(function (athletes) {
-      // Cache
+      // Cache in localStorage with timestamp
       try {
-        sessionStorage.setItem(CACHE_KEY, JSON.stringify(athletes));
+        localStorage.setItem(CACHE_KEY, JSON.stringify({
+          timestamp: Date.now(),
+          data: athletes
+        }));
       } catch (e) { /* ignore */ }
       return athletes;
     });

@@ -18,7 +18,8 @@
       "WebFetch(domain:www.nbc.com)",
       "WebFetch(domain:deadline.com)",
       "WebFetch(domain:www.sportsmediawatch.com)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash(xxd:*)"
     ]
   }
 }

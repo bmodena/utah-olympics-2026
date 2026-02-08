@@ -1,8 +1,45 @@
 /**
  * schedule.js - Fetch schedule from RapidAPI (sole source of truth),
  * then match events to Utah athletes.
+ * Caches API responses in localStorage to minimize API calls.
  */
 var Schedule = (function () {
+
+  var SCHEDULE_CACHE_KEY = 'utah_olympics_schedule_v1';
+  var BROADCAST_CACHE_KEY = 'utah_olympics_broadcast_v1';
+
+  // TTL: 4 hours during Olympics (Feb 6-22), 24 hours otherwise
+  function getCacheTTL() {
+    var now = new Date();
+    var start = new Date('2026-02-06T00:00:00');
+    var end = new Date('2026-02-23T00:00:00');
+    if (now >= start && now <= end) return 4 * 60 * 60 * 1000;
+    return 24 * 60 * 60 * 1000;
+  }
+
+  function forceRefresh() {
+    return window.location.search.indexOf('refresh') !== -1;
+  }
+
+  function getCache(key) {
+    if (forceRefresh()) return null;
+    try {
+      var raw = localStorage.getItem(key);
+      if (!raw) return null;
+      var cached = JSON.parse(raw);
+      if (Date.now() - cached.timestamp > getCacheTTL()) return null;
+      return cached.data;
+    } catch (e) { return null; }
+  }
+
+  function setCache(key, data) {
+    try {
+      localStorage.setItem(key, JSON.stringify({
+        timestamp: Date.now(),
+        data: data
+      }));
+    } catch (e) { /* ignore quota errors */ }
+  }
 
   /**
    * Fetch schedule from RapidAPI.
@@ -297,17 +334,33 @@ var Schedule = (function () {
   }
 
   /**
-   * Main entry: fetch from API and apply broadcast rules.
+   * Main entry: fetch from API (with cache) and apply broadcast rules.
    */
   function fetchSchedule() {
     var apiKey = CONFIG.RAPIDAPI_KEY;
     if (!apiKey) {
       return Promise.reject(new Error('No RapidAPI key configured. Add your key in js/config.js.'));
     }
-    return Promise.all([
-      fetchFromAPI(apiKey),
-      fetchBroadcastRules()
-    ]).then(function (results) {
+
+    // Check schedule cache
+    var cachedSchedule = getCache(SCHEDULE_CACHE_KEY);
+    var cachedBroadcast = getCache(BROADCAST_CACHE_KEY);
+
+    var schedulePromise = cachedSchedule
+      ? Promise.resolve(cachedSchedule)
+      : fetchFromAPI(apiKey).then(function (events) {
+          setCache(SCHEDULE_CACHE_KEY, events);
+          return events;
+        });
+
+    var broadcastPromise = cachedBroadcast
+      ? Promise.resolve(cachedBroadcast)
+      : fetchBroadcastRules().then(function (rules) {
+          if (rules) setCache(BROADCAST_CACHE_KEY, rules);
+          return rules;
+        });
+
+    return Promise.all([schedulePromise, broadcastPromise]).then(function (results) {
       var events = results[0];
       var rules = results[1];
       return applyBroadcastRules(events, rules);
