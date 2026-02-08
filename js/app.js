@@ -1,42 +1,103 @@
 /**
- * app.js - Main initialization, rendering, filtering, sorting, and search.
+ * app.js — Main application: initialization, rendering, filtering, sorting, and search.
+ *
+ * This is the entry point that ties everything together. On DOM ready:
+ *   1. Reads the current view from the URL hash (#date, #sport, #athlete)
+ *   2. Sets up sort buttons, search input, and event handlers
+ *   3. Fetches athletes + schedule in parallel
+ *   4. Matches athletes to events via Schedule.matchScheduleToAthletes()
+ *   5. Renders grouped event cards into the DOM
+ *
+ * Three views are supported:
+ *   - Date view:    Events grouped by date, sticky date headers, auto-scroll to today
+ *   - Sport view:   Events grouped by sport name, with date + time per card
+ *   - Athlete view: Compact expandable list of athletes with their events
+ *
+ * Features:
+ *   - Hash-based routing with browser back/forward support
+ *   - Full-text search across athletes, sports, events, and networks
+ *   - Past event toggle (hidden by default, shown with muted styling)
+ *   - "Add to Calendar" dropdown (Google, Outlook, Yahoo, .ics download)
+ *   - Newsletter CTA banner (slide-up after 4s, dismissible per session)
+ *   - Social share buttons (X, Facebook, Email, Copy Link)
+ *   - GA4 event tracking for all user interactions
+ *   - iframe embed support with auto-height postMessage
+ *   - Timezone conversion: CET → user's local timezone
+ *
+ * @module App
  */
 (function () {
-  // State
-  var allEvents = [];
-  var currentSort = 'date';  // 'date' | 'sport' | 'athlete'
-  var searchQuery = '';
-  var showPast = false;
-  var initialScrollDone = false;
-  var athleteInfoMap = {}; // populated by groupEvents in athlete mode
 
+  // =====================================================================
+  // Application State
+  // =====================================================================
+
+  /** @type {Object[]} All matched events (athletes + schedule combined) */
+  var allEvents = [];
+
+  /** @type {string} Current view/sort mode: 'date' | 'sport' | 'athlete' */
+  var currentSort = 'date';
+
+  /** @type {string} Current search query (lowercased for matching) */
+  var searchQuery = '';
+
+  /** @type {boolean} Whether to show events with dates before today */
+  var showPast = false;
+
+  /** @type {boolean} Prevents auto-scroll to today on subsequent re-renders */
+  var initialScrollDone = false;
+
+  /** @type {Object} Maps athlete name → athlete info object (populated in athlete view) */
+  var athleteInfoMap = {};
+
+  /** @type {Object} Whitelist of valid URL hash view names */
   var VALID_VIEWS = { date: true, sport: true, athlete: true };
 
-  // GA4 event tracking helper
+  // =====================================================================
+  // Analytics
+  // =====================================================================
+
+  /**
+   * Send a GA4 event via gtag. No-op if gtag isn't loaded.
+   * @param {string} eventName - GA4 event name
+   * @param {Object} [params] - Event parameters
+   */
   function track(eventName, params) {
     if (typeof gtag === 'function') {
       gtag('event', eventName, params || {});
     }
   }
 
-  // ---- Hash-based URL routing ----
+  // =====================================================================
+  // Hash-based URL Routing
+  // =====================================================================
 
+  /**
+   * Read the current view from the URL hash.
+   * Strips leading #/ and validates against VALID_VIEWS.
+   * @returns {string} View name ('date', 'sport', 'athlete') or '' if invalid
+   */
   function readHash() {
     var hash = window.location.hash.replace(/^#\/?/, '').toLowerCase();
     return VALID_VIEWS[hash] ? hash : '';
   }
 
+  /**
+   * Update the URL hash and send a GA4 virtual pageview.
+   * Uses pushState for clean browser history.
+   * @param {string} view - View name to set
+   */
   function updateHash(view) {
     var newHash = '#' + view;
     if (window.location.hash !== newHash) {
       history.pushState(null, '', newHash);
     }
-    // GA4 virtual pageview
     if (typeof gtag === 'function') {
       gtag('config', 'G-T2RPDQ96M7', { page_path: '/' + view });
     }
   }
 
+  /** @type {Object} Maps view keys to display labels for the controls bar */
   var VIEW_LABELS = { date: 'Date', sport: 'Sport', athlete: 'Athlete' };
 
   function syncSortButtons() {
@@ -70,7 +131,17 @@
     return dateStr < getTodayStr();
   }
 
-  // Inline SVG icon helper
+  // =====================================================================
+  // SVG Sport Icons
+  // =====================================================================
+
+  /**
+   * Build an inline SVG string from path data.
+   * All icons use the same stroke-based style for consistency.
+   * @param {string} paths - SVG path/shape elements
+   * @param {string} [vb='0 0 24 24'] - viewBox attribute
+   * @returns {string} Complete SVG markup
+   */
   function svg(paths, vb) {
     return '<svg class="icon" viewBox="' + (vb || '0 0 24 24') + '" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + paths + '</svg>';
   }
@@ -114,8 +185,11 @@
   var downloadIcon = svg('<path d="M12 5v10"/><path d="M7 12l5 5 5-5"/><line x1="5" y1="20" x2="19" y2="20"/>');
   var chevronDown = '<svg class="icon icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>';
 
-  // ---- Calendar helpers ----
+  // =====================================================================
+  // Calendar Integration (Google, Outlook, Yahoo, .ics)
+  // =====================================================================
 
+  /** Zero-pad a number to 2 digits. */
   function pad2(n) { return n < 10 ? '0' + n : '' + n; }
 
   function formatUTCCompact(d) {
@@ -276,8 +350,12 @@
     }
   };
 
+  // =====================================================================
+  // Display Formatting
+  // =====================================================================
+
   /**
-   * Format an ISO date string into a friendly display.
+   * Format an ISO date string (YYYY-MM-DD) into "Day, Mon DD" (e.g., "Sat, Feb 7").
    */
   function formatDate(dateStr) {
     if (!dateStr) return '';
@@ -327,8 +405,13 @@
     return h + ':' + m + ' ' + ampm + ' MT';
   }
 
+  // =====================================================================
+  // Filtering, Sorting & Grouping
+  // =====================================================================
+
   /**
-   * Apply filter, sort, and search to events.
+   * Apply all active filters (past events, search) and sort the event list.
+   * Returns a new array — does not mutate allEvents.
    */
   function getFilteredEvents() {
     var events = allEvents;
@@ -420,8 +503,13 @@
     return groups;
   }
 
+  // =====================================================================
+  // DOM Rendering
+  // =====================================================================
+
   /**
-   * Render grouped events into the DOM.
+   * Main render function: builds HTML for all visible event cards and
+   * injects it into #schedule-container. Handles all three views.
    */
   function render() {
     var container = document.getElementById('schedule-container');
@@ -637,8 +725,12 @@
     return div.innerHTML;
   }
 
+  // =====================================================================
+  // UI Event Handlers
+  // =====================================================================
+
   /**
-   * Set up sort buttons.
+   * Bind click handlers to sort buttons (Date / Sport / Athlete).
    */
   function initSort() {
     var btns = document.querySelectorAll('.sort-btn');
@@ -687,8 +779,13 @@
     bar.className = 'status-bar hidden';
   }
 
+  // =====================================================================
+  // Initialization
+  // =====================================================================
+
   /**
-   * Main init: fetch data, match, render.
+   * Main init: set up UI, fetch athletes + schedule, match, render.
+   * Called on DOMContentLoaded (or immediately if DOM is already ready).
    */
   function init() {
     // Read view from URL hash before anything renders
@@ -863,7 +960,15 @@
     });
   }
 
-  // Broadcast height to parent when embedded in an iframe
+  // =====================================================================
+  // iframe Embed Support
+  // =====================================================================
+
+  /**
+   * Broadcast the document's scroll height to the parent window.
+   * Used when the app is embedded in an iframe — the parent listens for
+   * 'pc-olympics-resize' messages to auto-size the iframe.
+   */
   function postHeight() {
     if (window.self !== window.top) {
       try {

@@ -1,14 +1,50 @@
 /**
- * schedule.js - Fetch schedule from RapidAPI (sole source of truth),
- * then match events to Utah athletes.
- * Caches API responses in localStorage to minimize API calls.
+ * schedule.js — Fetch the Milano Cortina 2026 schedule from RapidAPI,
+ * normalize events, apply broadcast rules, and match to Park City athletes.
+ *
+ * Data flow:
+ *   1. Check localStorage cache (4h during Olympics, 24h otherwise)
+ *   2. If stale → fetch from RapidAPI /events endpoint
+ *   3. Normalize API response:
+ *      a. Map API sport codes to display names
+ *      b. Reclassify ~38 "unknown" events using venue/discipline heuristics
+ *      c. Fix snowboard events the API labels as "Freestyle Skiing"
+ *      d. Clean embedded venue names from discipline text
+ *      e. Detect event gender (Men's/Women's/Mixed) from raw text
+ *      f. Filter to medal events only
+ *   4. Fetch broadcast rules from data/broadcast.json
+ *   5. Apply per-sport TV networks, NBC primetime, and Peacock streaming
+ *   6. Match events to athletes by sport, gender, and event discipline
+ *
+ * Known API quirks:
+ *   - ~38 events come back with sport="unknown" (luge, skeleton, short track,
+ *     figure skating, etc.) — classifyUnknownEvent() handles these
+ *   - Some snowboard events are labeled "freestyle_skiing" by the API
+ *   - Venue info is sometimes null, with venue name embedded in discipline text
+ *   - Discipline text includes "Medal Event" and venue names concatenated
+ *   - API returns 127 medal events vs 116 official (sub-rounds counted separately)
+ *   - Ski Mountaineering (new for 2026) is absent from the API entirely
+ *
+ * Exposes: Schedule.fetchSchedule(), Schedule.matchScheduleToAthletes(),
+ *          Schedule.normalizeSport()
+ *
+ * @module Schedule
  */
 var Schedule = (function () {
 
+  /** @type {string} localStorage key for cached schedule */
   var SCHEDULE_CACHE_KEY = 'utah_olympics_schedule_v1';
+
+  /** @type {string} localStorage key for cached broadcast rules */
   var BROADCAST_CACHE_KEY = 'utah_olympics_broadcast_v1';
 
-  // TTL: 4 hours during Olympics (Feb 6-22), 24 hours otherwise
+  /**
+   * Get cache TTL based on whether we're in the Olympic competition window.
+   * During the Games (Feb 6–22, 2026): 4 hours for fresher data.
+   * Otherwise: 24 hours to minimize API calls.
+   *
+   * @returns {number} TTL in milliseconds
+   */
   function getCacheTTL() {
     var now = new Date();
     var start = new Date('2026-02-06T00:00:00');
@@ -17,10 +53,19 @@ var Schedule = (function () {
     return 24 * 60 * 60 * 1000;
   }
 
+  /**
+   * Check if ?refresh is in the URL to force bypass of all caches.
+   * @returns {boolean}
+   */
   function forceRefresh() {
     return window.location.search.indexOf('refresh') !== -1;
   }
 
+  /**
+   * Read cached data from localStorage if still within TTL.
+   * @param {string} key - localStorage key
+   * @returns {*|null} Cached data or null if expired/missing
+   */
   function getCache(key) {
     if (forceRefresh()) return null;
     try {
@@ -32,6 +77,12 @@ var Schedule = (function () {
     } catch (e) { return null; }
   }
 
+  /**
+   * Write data to localStorage with a timestamp for TTL checks.
+   * Silently ignores quota errors.
+   * @param {string} key - localStorage key
+   * @param {*} data - Data to cache (must be JSON-serializable)
+   */
   function setCache(key, data) {
     try {
       localStorage.setItem(key, JSON.stringify({
@@ -41,8 +92,15 @@ var Schedule = (function () {
     } catch (e) { /* ignore quota errors */ }
   }
 
+  // =====================================================================
+  // API Fetching
+  // =====================================================================
+
   /**
-   * Fetch schedule from RapidAPI.
+   * Fetch raw schedule data from the RapidAPI Milano Cortina 2026 endpoint.
+   *
+   * @param {string} apiKey - RapidAPI key from CONFIG
+   * @returns {Promise<Object[]>} Normalized event objects
    */
   function fetchFromAPI(apiKey) {
     var url = 'https://' + CONFIG.RAPIDAPI_HOST + '/events';
@@ -60,8 +118,14 @@ var Schedule = (function () {
     });
   }
 
+  // =====================================================================
+  // Sport Name Mapping
+  // =====================================================================
+
   /**
-   * Convert API sport name (e.g. "alpine_skiing") to display name ("Alpine Skiing").
+   * Map from API snake_case sport codes to human-readable display names.
+   * These 16 sports cover the full Milano Cortina 2026 program.
+   * @type {Object.<string, string>}
    */
   var apiSportNames = {
     'alpine_skiing': 'Alpine Skiing',
@@ -82,19 +146,39 @@ var Schedule = (function () {
     'speed_skating': 'Speed Skating'
   };
 
+  /**
+   * Convert an API sport code to its display name.
+   * @param {string} apiName - API sport code (e.g., "alpine_skiing")
+   * @returns {string} Display name (e.g., "Alpine Skiing")
+   */
   function displaySportName(apiName) {
     return apiSportNames[(apiName || '').toLowerCase()] || apiName || '';
   }
 
+  // =====================================================================
+  // Unknown Event Classification
+  // =====================================================================
+
   /**
-   * Classify "unknown" sport events using venue and discipline text.
-   * The API misclassifies ~157 events as "unknown". We fix them here.
+   * Classify events the API returns with sport="unknown".
+   *
+   * The API misclassifies ~38 medal events. We use venue names and
+   * discipline text to determine the correct sport. Classification rules:
+   *
+   *   Cortina Sliding Centre → Luge (singles/doubles/relay) or Skeleton (heats)
+   *   Milano Ice Skating Arena / PalaSharp → Figure Skating or Short Track
+   *   Discipline contains "aerials/moguls/freeski/ski cross" → Freestyle Skiing
+   *   Discipline contains "Stelvio/combined" → Alpine Skiing
+   *   Discipline contains "medal game/semi-final" → Ice Hockey
+   *
+   * @param {Object} e - Raw API event object
+   * @returns {string} Corrected sport display name, or '' if unclassifiable
    */
   function classifyUnknownEvent(e) {
     var disc = (e.discipline || '').toLowerCase();
     var venueName = (e.venue && e.venue.name) ? e.venue.name.toLowerCase() : '';
 
-    // Cortina Sliding Centre → Luge (singles/doubles/relay), Skeleton (heats), Bobsleigh
+    // Cortina Sliding Centre → Luge or Skeleton
     if (venueName.indexOf('sliding') !== -1) {
       if (disc.indexOf('singles') !== -1 || disc.indexOf('doubles') !== -1 ||
           disc.indexOf('mixed team') !== -1 || disc.indexOf('team relay') !== -1) {
@@ -106,7 +190,7 @@ var Schedule = (function () {
       return 'Luge';
     }
 
-    // Milano Ice Skating Arena → Short Track or Figure Skating
+    // Milano Ice Skating Arena / PalaSharp → Figure Skating or Short Track
     if (venueName.indexOf('ice skating') !== -1 || venueName.indexOf('palasharp') !== -1) {
       if (disc.indexOf('single skating') !== -1 || disc.indexOf('team event') !== -1 ||
           disc.indexOf('free skating') !== -1 || disc.indexOf('ice danc') !== -1 ||
@@ -116,7 +200,7 @@ var Schedule = (function () {
       return 'Short Track Speed Skating';
     }
 
-    // Null venue events — venue name is embedded in discipline string
+    // Events with null venue — venue name is embedded in discipline text
     if (disc.indexOf('aerials') !== -1 || disc.indexOf('moguls') !== -1) {
       return 'Freestyle Skiing';
     }
@@ -136,12 +220,22 @@ var Schedule = (function () {
     return '';
   }
 
+  // =====================================================================
+  // Discipline Text Cleaning
+  // =====================================================================
+
   /**
-   * Clean discipline text: remove embedded venue names and "Medal Event" markers.
+   * Remove embedded venue names and "Medal Event" markers from discipline text.
+   *
+   * The API concatenates venue names directly into the discipline field
+   * (e.g., "Men's DownhillMedal EventStelvio Ski Centre"). This strips
+   * those artifacts to produce clean event names for display.
+   *
+   * @param {string} disc - Raw discipline text from API
+   * @returns {string} Cleaned discipline text
    */
   function cleanDiscipline(disc) {
     if (!disc) return '';
-    // Remove embedded venue names (they appear concatenated without spaces)
     return disc
       .replace(/Medal Event/g, '')
       .replace(/Livigno Aerials & Moguls Park/g, '')
@@ -156,13 +250,28 @@ var Schedule = (function () {
       .trim();
   }
 
+  // =====================================================================
+  // Data Normalization
+  // =====================================================================
+
   /**
-   * Normalize API response into our standard event format.
+   * Normalize the raw API response into our standard event format.
+   *
+   * Performs all data cleaning in a single pass:
+   *   1. Classify "unknown" sports
+   *   2. Build venue string from venue object or embedded text
+   *   3. Clean discipline text
+   *   4. Reclassify misattributed snowboard events
+   *   5. Detect event gender from all available text
+   *   6. Filter to medal events only (drops qualifiers, training, unknown sports)
+   *
+   * @param {Object|Array} data - Raw API response (array or {events: [...]})
+   * @returns {Object[]} Array of normalized event objects
    */
   function normalizeAPIData(data) {
     var events = Array.isArray(data) ? data : (data.events || data.schedule || []);
     return events.map(function (e) {
-      // Determine sport — fix "unknown" classification
+      // Step 1: Determine sport — fix "unknown" classification
       var sport = e.sport;
       if (!sport || sport === 'unknown') {
         var classified = classifyUnknownEvent(e);
@@ -171,7 +280,7 @@ var Schedule = (function () {
         sport = displaySportName(sport);
       }
 
-      // Build venue string from venue object
+      // Step 2: Build venue string from structured or embedded data
       var venue = '';
       if (e.venue) {
         if (typeof e.venue === 'string') {
@@ -184,7 +293,7 @@ var Schedule = (function () {
         }
       }
 
-      // If venue was missing but embedded in discipline, extract it
+      // Extract venue from discipline text when venue object is empty
       if (!venue) {
         var rawDisc = e.discipline || '';
         if (rawDisc.indexOf('Livigno Aerials') !== -1) venue = 'Livigno Aerials & Moguls Park, Livigno';
@@ -195,9 +304,10 @@ var Schedule = (function () {
         else if (rawDisc.indexOf('Predazzo') !== -1) venue = 'Predazzo Ski Jumping Stadium, Predazzo';
       }
 
+      // Step 3: Clean discipline text (remove embedded venues + "Medal Event")
       var cleaned = cleanDiscipline(e.discipline);
 
-      // Reclassify snowboard events the API puts under Freestyle Skiing
+      // Step 4: Reclassify snowboard events the API misattributes to Freestyle Skiing
       var rawDiscLower = (e.discipline || '').toLowerCase();
       if (sport === 'Freestyle Skiing' && (
         rawDiscLower.indexOf('sbd ') !== -1 ||
@@ -209,7 +319,7 @@ var Schedule = (function () {
         sport = 'Snowboard';
       }
 
-      // Detect event gender from ALL raw API text before cleaning strips it
+      // Step 5: Detect event gender from all raw API text before cleaning
       var genderSource = [
         e.discipline || '',
         e.event || '',
@@ -218,7 +328,7 @@ var Schedule = (function () {
       ].join(' ').toLowerCase();
       var eventGender = '';
       if (genderSource.indexOf('mixed') !== -1) {
-        eventGender = '';
+        eventGender = '';  // Mixed events match both genders
       } else if (genderSource.indexOf('women') !== -1 || genderSource.indexOf('ladies') !== -1) {
         eventGender = 'F';
       } else if (/\bmen\b/.test(genderSource) || genderSource.indexOf("men's") !== -1 || genderSource.indexOf("men\u2019s") !== -1) {
@@ -227,25 +337,40 @@ var Schedule = (function () {
 
       return {
         id: e.id || '',
-        date: e.date || '',
-        time: e.time || '',
-        sport: sport,
-        discipline: cleaned,
+        date: e.date || '',           // YYYY-MM-DD
+        time: e.time || '',           // HH:MM in CET (UTC+1)
+        sport: sport,                 // Display name (e.g., "Alpine Skiing")
+        discipline: cleaned,          // Cleaned discipline text
         event: cleaned || e.event || e.eventName || '',
-        venue: venue,
+        venue: venue,                 // "Venue Name, City" or ""
         isMedalEvent: e.is_medal_event || false,
-        status: e.status || 'upcoming',
-        eventGender: eventGender,
-        broadcast: []
+        status: e.status || 'upcoming',  // "upcoming" | "live" | "completed"
+        eventGender: eventGender,     // "M" | "F" | ""
+        broadcast: []                 // Populated later by applyBroadcastRules()
       };
     }).filter(function (e) {
-      // Only keep medal events; drop training, qualifiers, and unknown sports
+      // Step 6: Only keep medal events with known sports
       return e.sport !== 'unknown' && e.isMedalEvent;
     });
   }
 
+  // =====================================================================
+  // Broadcast Rules
+  // =====================================================================
+
   /**
-   * Fetch broadcast rules from data/broadcast.json.
+   * Fetch broadcast rules from the local JSON file.
+   * Returns null on failure (broadcast info is optional).
+   *
+   * Expected format of broadcast.json:
+   *   {
+   *     "streaming": { "network": "Peacock", "type": "streaming" },
+   *     "sportNetworks": { "Alpine Skiing": "NBC / USA Network", ... },
+   *     "medalPrimetime": { "network": "NBC", "time": "19:00" },
+   *     "eventOverrides": {}
+   *   }
+   *
+   * @returns {Promise<Object|null>}
    */
   function fetchBroadcastRules() {
     return fetch(CONFIG.BROADCAST_DATA || 'data/broadcast.json')
@@ -257,9 +382,14 @@ var Schedule = (function () {
   }
 
   /**
-   * Convert CET time (HH:MM) to Mountain Standard Time (HH:MM).
+   * Convert a CET time string (HH:MM) to Mountain Standard Time.
+   *
    * CET = UTC+1, MST = UTC-7 → offset is -8 hours.
-   * February has no DST in either timezone.
+   * February has no DST transition in either timezone, so a simple
+   * arithmetic offset is safe for the entire competition window.
+   *
+   * @param {string} timeStr - Time in "HH:MM" CET format
+   * @returns {string} Time in "HH:MM" MST format, or '' if invalid
    */
   function cetToMountain(timeStr) {
     if (!timeStr) return '';
@@ -273,8 +403,18 @@ var Schedule = (function () {
   }
 
   /**
-   * Apply broadcast rules to normalized events.
-   * Each event gets: sport-specific live network, NBC primetime (medal events), Peacock streaming.
+   * Enrich events with broadcast information based on rules from broadcast.json.
+   *
+   * Each event gets up to 3 broadcast entries:
+   *   1. Sport-specific live TV network (e.g., "NBC / USA Network")
+   *   2. NBC primetime for medal events (at 7:00 PM MT)
+   *   3. Peacock streaming (always available)
+   *
+   * Event-specific overrides (eventOverrides) take precedence over rules.
+   *
+   * @param {Object[]} events - Normalized event objects
+   * @param {Object|null} rules - Broadcast rules from broadcast.json
+   * @returns {Object[]} Events with broadcast arrays populated
    */
   function applyBroadcastRules(events, rules) {
     if (!rules) return events;
@@ -293,7 +433,7 @@ var Schedule = (function () {
         broadcasts.push({
           network: sportNet,
           type: 'live',
-          time: cetToMountain(evt.time)
+          time: cetToMountain(evt.time)  // Convert CET event time to MT for display
         });
       }
 
@@ -302,11 +442,11 @@ var Schedule = (function () {
         broadcasts.push({
           network: rules.medalPrimetime.network,
           type: 'primetime',
-          time: rules.medalPrimetime.time
+          time: rules.medalPrimetime.time  // Already in MT (e.g., "19:00")
         });
       }
 
-      // Peacock streaming (always)
+      // Peacock streaming (always available for all events)
       if (rules.streaming) {
         broadcasts.push({
           network: rules.streaming.network,
@@ -318,7 +458,14 @@ var Schedule = (function () {
     });
   }
 
-  /** Simple object assign polyfill for older browsers. */
+  /**
+   * Simple Object.assign polyfill for older browsers.
+   * Creates a new object merging all properties from the arguments.
+   *
+   * @param {Object} target - Base object
+   * @param {...Object} sources - Source objects to merge in
+   * @returns {Object} New merged object (target is not mutated)
+   */
   function assign(target) {
     var result = {};
     for (var k in target) {
@@ -333,8 +480,15 @@ var Schedule = (function () {
     return result;
   }
 
+  // =====================================================================
+  // Main Fetch Entry Point
+  // =====================================================================
+
   /**
-   * Main entry: fetch from API (with cache) and apply broadcast rules.
+   * Main entry: fetch schedule from API (with cache) and apply broadcast rules.
+   *
+   * @returns {Promise<Object[]>} Array of normalized events with broadcast info
+   * @throws {Error} If no RapidAPI key is configured
    */
   function fetchSchedule() {
     var apiKey = CONFIG.RAPIDAPI_KEY;
@@ -342,10 +496,10 @@ var Schedule = (function () {
       return Promise.reject(new Error('No RapidAPI key configured. Add your key in js/config.js.'));
     }
 
-    // Check schedule cache
     var cachedSchedule = getCache(SCHEDULE_CACHE_KEY);
     var cachedBroadcast = getCache(BROADCAST_CACHE_KEY);
 
+    // Fetch schedule and broadcast rules in parallel
     var schedulePromise = cachedSchedule
       ? Promise.resolve(cachedSchedule)
       : fetchFromAPI(apiKey).then(function (events) {
@@ -367,8 +521,15 @@ var Schedule = (function () {
     });
   }
 
+  // =====================================================================
+  // Athlete-to-Event Matching
+  // =====================================================================
+
   /**
-   * Sport name normalization map for matching athletes to schedule events.
+   * Sport name normalization map.
+   * Maps various athlete CSV sport names to canonical lowercase keys
+   * for matching against schedule event sport names.
+   * @type {Object.<string, string>}
    */
   var sportAliases = {
     'alpine skiing': 'alpine skiing',
@@ -404,8 +565,13 @@ var Schedule = (function () {
   };
 
   /**
-   * Event alias map: maps athlete Event column values to API text patterns.
-   * Handles API abbreviations and naming differences.
+   * Event alias map: maps athlete CSV Event column values to text patterns
+   * found in the API's discipline/event fields.
+   *
+   * Needed because the API uses abbreviations (e.g., "4-man" for "Four-Man",
+   * "PGS" for "Parallel Giant Slalom", "SBX" for "Snowboard Cross").
+   *
+   * @type {Object.<string, string[]>}
    */
   var eventAliases = {
     'four-man': ['4-man'],
@@ -422,6 +588,11 @@ var Schedule = (function () {
     'individual': ['individual', 'ind.']
   };
 
+  /**
+   * Normalize a sport name to its canonical form for matching.
+   * @param {string} name - Sport name from any source
+   * @returns {string} Lowercase canonical sport name
+   */
   function normalizeSport(name) {
     if (!name) return '';
     var lower = name.toLowerCase().trim();
@@ -429,14 +600,18 @@ var Schedule = (function () {
   }
 
   /**
-   * Check if an athlete's event matches the schedule event text.
-   * Uses eventAliases for API abbreviation handling.
+   * Check if an athlete's event discipline matches the schedule event text.
+   * First tries direct substring match, then checks aliases.
+   *
+   * @param {string} athleteEvent - Event name from athlete CSV (e.g., "Downhill")
+   * @param {string} evtText - Combined discipline + event text from API (lowercased, padded)
+   * @returns {boolean} True if the athlete competes in this event
    */
   function eventMatches(athleteEvent, evtText) {
     var ev = athleteEvent.toLowerCase();
     // Direct substring match
     if (evtText.indexOf(ev) !== -1) return true;
-    // Check aliases
+    // Check aliases for API abbreviation differences
     var aliases = eventAliases[ev];
     if (aliases) {
       return aliases.some(function (a) {
@@ -447,12 +622,21 @@ var Schedule = (function () {
   }
 
   /**
-   * Match schedule events to athletes.
-   * Returns enriched schedule entries with matched athletes.
-   * Uses athlete Events column for strict matching.
-   * Filters by gender when the event specifies Men's or Women's.
+   * Match schedule events to the athlete roster.
+   *
+   * Algorithm:
+   *   1. Index athletes by normalized sport name
+   *   2. For each event, find athletes in the same sport
+   *   3. Filter by gender if the event specifies Men's or Women's
+   *   4. Strict-match against athlete's Events column using eventAliases
+   *   5. Only return events that matched at least one athlete
+   *
+   * @param {Object[]} schedule - Normalized events from fetchSchedule()
+   * @param {Object[]} athletes - Normalized athletes from Athletes.fetchAthletes()
+   * @returns {Object[]} Events with matched athletes array attached
    */
   function matchScheduleToAthletes(schedule, athletes) {
+    // Build a lookup: sport → [athletes]
     var sportMap = {};
     athletes.forEach(function (ath) {
       var key = normalizeSport(ath.sport);
@@ -464,18 +648,18 @@ var Schedule = (function () {
       var eventSport = normalizeSport(evt.sport);
       var matched = sportMap[eventSport] || [];
 
-      // Filter by gender: "Men's" events → M only, "Women's" → F only
+      // Gender filter: Men's events → male athletes only, Women's → female only
       if (evt.eventGender && matched.length > 0) {
         matched = matched.filter(function (ath) {
           return !ath.gender || ath.gender === evt.eventGender;
         });
       }
 
-      // Strict matching on athlete Events column
+      // Strict event discipline matching using athlete Events column
       if (matched.length > 0) {
         var evtDisc = (evt.discipline || '').toLowerCase().trim();
         var evtEvent = (evt.event || '').toLowerCase().trim();
-        var evtText = ' ' + evtDisc + ' ' + evtEvent + ' ';
+        var evtText = ' ' + evtDisc + ' ' + evtEvent + ' ';  // Padded for boundary matching
 
         matched = matched.filter(function (ath) {
           if (ath.events && ath.events.length > 0) {
@@ -483,7 +667,7 @@ var Schedule = (function () {
               return eventMatches(ev, evtText);
             });
           }
-          // No events defined — include as fallback
+          // Athletes with no events defined are included as fallback
           return true;
         });
       }
@@ -502,10 +686,12 @@ var Schedule = (function () {
         athletes: matched
       };
     }).filter(function (evt) {
+      // Only show events where at least one Park City athlete is competing
       return evt.athletes.length > 0;
     });
   }
 
+  // Public API
   return {
     fetchSchedule: fetchSchedule,
     matchScheduleToAthletes: matchScheduleToAthletes,

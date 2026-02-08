@@ -1,3 +1,31 @@
+/*
+ * styles.css — Park City Olympics 2026 Tracker
+ *
+ * Mobile-first responsive design with three breakpoints:
+ *   - Base:    < 641px  (mobile phones)
+ *   - Tablet:  641px+   (controls expand, event cards get 2-column grid)
+ *   - Desktop: 961px+   (larger header, wider search)
+ *
+ * Color system uses CSS custom properties (--olympic-*) for theming.
+ * The primary brand color (--olympic-blue: #993820) is actually a
+ * terracotta/rust matching the Park City/TownLift brand, not IOC blue.
+ *
+ * Layout hierarchy:
+ *   .site-header        — Fixed gradient header with title + share buttons
+ *   .main-content       — Max 960px centered container
+ *     .disclosure        — Legal disclaimer banner
+ *     .controls          — Filter/sort/search bar (collapsible on mobile)
+ *     .schedule-container — Event cards rendered by app.js
+ *       .date-group       — Date-grouped section with sticky header
+ *         .event-card      — Individual event (collapsible, shows details on expand)
+ *       .athlete-list     — Athlete view: expandable rows per athlete
+ *   .site-footer        — Links + TMBR credit
+ *   .cta-banner         — Fixed bottom newsletter CTA (slide-up animation)
+ *
+ * Event card states: .medal-event, .status-live, .status-completed, .past-event
+ * Calendar dropdown: .cal-action > .cal-btn + .cal-dropdown
+ */
+
 /* ===== Reset & Base ===== */
 *, *::before, *::after {
   box-sizing: border-box;
