@@ -29,8 +29,10 @@
   <meta name="apple-mobile-web-app-title" content="PC Olympics">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="dns-prefetch" href="https://milano-cortina-2026-olympics-api.p.rapidapi.com">
+  <link rel="dns-prefetch" href="https://docs.google.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css?v=17">
+  <link rel="stylesheet" href="css/styles.css?v=18">
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-T2RPDQ96M7"></script>
   <script>
@@ -46,7 +48,10 @@
       <div class="header-presented">
         <span class="presented-label">Presented by</span>
         <a href="https://townlift.com" target="_blank" rel="noopener" class="presented-logo-link">
-          <img src="images/TownLift_SecondaryLogo_Cream.png" alt="TownLift" class="presented-logo">
+          <picture>
+            <source srcset="images/TownLift_SecondaryLogo_Cream.webp" type="image/webp">
+            <img src="images/TownLift_SecondaryLogo_Cream_200.png" alt="TownLift" class="presented-logo" width="200" height="64">
+          </picture>
         </a>
         <span class="presented-tagline">Park City's Community News</span>
       </div>
@@ -138,9 +143,9 @@
     </div>
   </div>
 
-  <script src="js/config.js?v=17"></script>
-  <script src="js/athletes.js?v=17"></script>
-  <script src="js/schedule.js?v=17"></script>
-  <script src="js/app.js?v=17"></script>
+  <script src="js/config.js?v=18" defer></script>
+  <script src="js/athletes.js?v=18" defer></script>
+  <script src="js/schedule.js?v=18" defer></script>
+  <script src="js/app.js?v=18" defer></script>
 </body>
 </html>
