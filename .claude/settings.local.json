@@ -20,7 +20,8 @@
       "WebFetch(domain:www.sportsmediawatch.com)",
       "Bash(cat:*)",
       "Bash(xxd:*)",
-      "Bash(/tmp/match_events.py:*)"
+      "Bash(/tmp/match_events.py:*)",
+      "WebFetch(domain:api.olympics.com)"
     ]
   }
 }
