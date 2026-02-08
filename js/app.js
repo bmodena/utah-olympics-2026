@@ -9,6 +9,44 @@
   var initialScrollDone = false;
   var athleteInfoMap = {}; // populated by groupEvents in athlete mode
 
+  var VALID_VIEWS = { date: true, sport: true, athlete: true };
+
+  // GA4 event tracking helper
+  function track(eventName, params) {
+    if (typeof gtag === 'function') {
+      gtag('event', eventName, params || {});
+    }
+  }
+
+  // ---- Hash-based URL routing ----
+
+  function readHash() {
+    var hash = window.location.hash.replace(/^#\/?/, '').toLowerCase();
+    return VALID_VIEWS[hash] ? hash : '';
+  }
+
+  function updateHash(view) {
+    var newHash = '#' + view;
+    if (window.location.hash !== newHash) {
+      history.pushState(null, '', newHash);
+    }
+    // GA4 virtual pageview
+    if (typeof gtag === 'function') {
+      gtag('config', 'G-T2RPDQ96M7', { page_path: '/' + view });
+    }
+  }
+
+  function syncSortButtons() {
+    var btns = document.querySelectorAll('.sort-btn');
+    btns.forEach(function (b) {
+      if (b.dataset.sort === currentSort) {
+        b.classList.add('active');
+      } else {
+        b.classList.remove('active');
+      }
+    });
+  }
+
   /**
    * Get today's date as YYYY-MM-DD in local timezone.
    */
@@ -184,20 +222,49 @@
     h += '<button type="button" class="cal-btn" onclick="_toggleCal(this)" title="Add to Calendar">' + calendarIcon + '<span class="cal-btn-label">Add to Calendar</span><span class="cal-btn-arrow">' + chevronDown + '</span></button>';
     h += '<div class="cal-dropdown">';
     h += '<div class="cal-dropdown-title">Add to Calendar</div>';
-    h += '<a href="' + escapeHTML(googleURL) + '" target="_blank" rel="noopener" class="cal-link"><span class="cal-icon cal-google">G</span> Google Calendar</a>';
-    h += '<a href="' + escapeHTML(outlookURL) + '" target="_blank" rel="noopener" class="cal-link"><span class="cal-icon cal-outlook">O</span> Outlook</a>';
-    h += '<a href="' + escapeHTML(yahooURL) + '" target="_blank" rel="noopener" class="cal-link"><span class="cal-icon cal-yahoo">Y</span> Yahoo</a>';
-    h += '<a href="' + escapeHTML(icsURI) + '" download="olympic-event.ics" class="cal-link"><span class="cal-icon cal-ics">' + downloadIcon + '</span> Apple / .ics</a>';
+    h += '<a href="' + escapeHTML(googleURL) + '" target="_blank" rel="noopener" class="cal-link" onclick="_trackCal(\'Google\')"><span class="cal-icon cal-google">G</span> Google Calendar</a>';
+    h += '<a href="' + escapeHTML(outlookURL) + '" target="_blank" rel="noopener" class="cal-link" onclick="_trackCal(\'Outlook\')"><span class="cal-icon cal-outlook">O</span> Outlook</a>';
+    h += '<a href="' + escapeHTML(yahooURL) + '" target="_blank" rel="noopener" class="cal-link" onclick="_trackCal(\'Yahoo\')"><span class="cal-icon cal-yahoo">Y</span> Yahoo</a>';
+    h += '<a href="' + escapeHTML(icsURI) + '" download="olympic-event.ics" class="cal-link" onclick="_trackCal(\'Apple_ICS\')"><span class="cal-icon cal-ics">' + downloadIcon + '</span> Apple / .ics</a>';
     h += '</div></div>';
     return h;
   }
+
+  window._toggleEvent = function (card) {
+    card.classList.toggle('expanded');
+    if (card.classList.contains('expanded')) {
+      var name = card.querySelector('.event-name-inline');
+      var sport = card.querySelector('.event-sport-label');
+      track('event_expand', {
+        event_name: name ? name.textContent : '',
+        sport: sport ? sport.textContent : ''
+      });
+    }
+  };
+
+  window._toggleAthlete = function (row) {
+    row.classList.toggle('expanded');
+    if (row.classList.contains('expanded')) {
+      var name = row.querySelector('.athlete-row-name');
+      track('athlete_expand', {
+        athlete_name: name ? name.textContent : ''
+      });
+    }
+  };
+
+  window._trackCal = function (provider) {
+    track('calendar_add', { calendar_provider: provider });
+  };
 
   window._toggleCal = function (btn) {
     var container = btn.parentElement;
     var wasOpen = container.classList.contains('open');
     var allOpen = document.querySelectorAll('.cal-action.open');
     for (var i = 0; i < allOpen.length; i++) allOpen[i].classList.remove('open');
-    if (!wasOpen) container.classList.add('open');
+    if (!wasOpen) {
+      container.classList.add('open');
+      track('calendar_open');
+    }
   };
 
   /**
@@ -368,7 +435,7 @@
         var athInfo = athleteInfoMap[key] || {};
         var country = athInfo.country && athInfo.country !== 'USA' ? ' (' + escapeHTML(athInfo.country) + ')' : '';
         var evts = groups[key];
-        html += '<div class="athlete-row" onclick="this.classList.toggle(\'expanded\')">';
+        html += '<div class="athlete-row" onclick="_toggleAthlete(this)">';
         html += '<div class="athlete-row-header">';
         html += '<span class="athlete-row-name">' + escapeHTML(key) + country + '</span>';
         html += '<span class="athlete-row-sport">' + escapeHTML(athInfo.sport || '') + '</span>';
@@ -465,7 +532,7 @@
         var medalBadge = evt.isMedalEvent ? '<span class="medal-indicator">' + medalIcon + '</span>' : '';
 
         // All events use unified collapsible card
-        html += '<div class="event-card' + medalClass + statusClass + pastClass + '" onclick="this.classList.toggle(\'expanded\')">';
+        html += '<div class="event-card' + medalClass + statusClass + pastClass + '" onclick="_toggleEvent(this)">';
         if (isAthleteView || currentSort !== 'date') {
           html += '<div class="event-time"><span class="event-date-label">' + escapeHTML(formatDate(evt.date)) + '</span>' + escapeHTML(timeDisplay) + statusBadge + '</div>';
         } else {
@@ -560,6 +627,8 @@
         btns.forEach(function (b) { b.classList.remove('active'); });
         btn.classList.add('active');
         currentSort = btn.dataset.sort;
+        updateHash(currentSort);
+        track('sort_change', { sort_by: currentSort });
         render();
       });
     });
@@ -575,6 +644,9 @@
       clearTimeout(debounceTimer);
       debounceTimer = setTimeout(function () {
         searchQuery = input.value.trim();
+        if (searchQuery) {
+          track('search', { search_term: searchQuery });
+        }
         render();
       }, 250);
     });
@@ -598,13 +670,69 @@
    * Main init: fetch data, match, render.
    */
   function init() {
+    // Read view from URL hash before anything renders
+    var hashView = readHash();
+    if (hashView) {
+      currentSort = hashView;
+    } else {
+      updateHash(currentSort);
+    }
+
     initSort();
+    syncSortButtons();
     initSearch();
+
+    // Handle browser back/forward
+    window.addEventListener('popstate', function () {
+      var view = readHash() || 'date';
+      if (view !== currentSort) {
+        currentSort = view;
+        syncSortButtons();
+        render();
+      }
+    });
 
     // Close calendar dropdowns on outside click
     document.addEventListener('click', function () {
       var allOpen = document.querySelectorAll('.cal-action.open');
       for (var i = 0; i < allOpen.length; i++) allOpen[i].classList.remove('open');
+    });
+
+    // Share buttons
+    var shareURL = 'https://utah2026.townlift.com/';
+    var shareTitle = 'Park City at the 2026 Winter Olympics';
+    var shareText = 'Track Park City athletes competing in Milano Cortina 2026';
+
+    document.getElementById('share-x').addEventListener('click', function () {
+      window.open('https://x.com/intent/tweet?url=' + encodeURIComponent(shareURL) + '&text=' + encodeURIComponent(shareText), '_blank', 'width=550,height=420');
+      track('share', { method: 'x' });
+    });
+
+    document.getElementById('share-fb').addEventListener('click', function () {
+      window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(shareURL), '_blank', 'width=550,height=420');
+      track('share', { method: 'facebook' });
+    });
+
+    document.getElementById('share-email').addEventListener('click', function () {
+      window.location.href = 'mailto:?subject=' + encodeURIComponent(shareTitle) + '&body=' + encodeURIComponent(shareText + '\n\n' + shareURL);
+      track('share', { method: 'email' });
+    });
+
+    document.getElementById('share-copy').addEventListener('click', function () {
+      var btn = this;
+      var toast = btn.querySelector('.copy-toast');
+      navigator.clipboard.writeText(shareURL).then(function () {
+        toast.classList.add('show');
+        setTimeout(function () { toast.classList.remove('show'); }, 1500);
+      });
+      track('share', { method: 'copy_link' });
+    });
+
+    // Track footer link clicks
+    document.querySelectorAll('.footer-links a').forEach(function (link) {
+      link.addEventListener('click', function () {
+        track('footer_link_click', { link_url: link.href, link_text: link.textContent });
+      });
     });
 
     Promise.all([
@@ -625,6 +753,7 @@
       }
 
       allEvents = Schedule.matchScheduleToAthletes(schedule, athletes);
+      track('data_loaded', { athletes: athletes.length, events: allEvents.length });
 
       if (allEvents.length === 0) {
         showStatus(

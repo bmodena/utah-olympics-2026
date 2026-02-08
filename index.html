@@ -27,13 +27,45 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css?v=8">
+  <link rel="stylesheet" href="css/styles.css?v=11">
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-T2RPDQ96M7"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-T2RPDQ96M7');
+  </script>
 </head>
 <body>
   <header class="site-header">
     <div class="header-content">
-      <h1 class="site-title">Park City at the 2026 Winter Olympics</h1>
-      <p class="site-subtitle">Track Park City athletes competing in Milano Cortina</p>
+      <div class="header-presented">
+        <span class="presented-label">Presented by</span>
+        <a href="https://townlift.com" target="_blank" rel="noopener" class="presented-logo-link">
+          <img src="images/TownLift_SecondaryLogo_Cream.png" alt="TownLift" class="presented-logo">
+        </a>
+        <span class="presented-tagline">Park City's Community News</span>
+      </div>
+      <h1 class="site-title">Track Park City Athletes Competing in Milano Cortina</h1>
+      <p class="site-subtitle">Data from <a href="https://ysausa.org/parkcitynation/" target="_blank" rel="noopener">YSA</a> &middot; <a href="https://www.nbcolympics.com/schedule" target="_blank" rel="noopener">NBC Schedule</a> &middot; <a href="https://www.olympics.com/en/milano-cortina-2026/schedule" target="_blank" rel="noopener">Olympics</a>
+        <span class="share-links">
+          <span class="share-sep">&middot;</span>
+          <button class="share-btn" id="share-x" title="Share on X" aria-label="Share on X">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+          </button>
+          <button class="share-btn" id="share-fb" title="Share on Facebook" aria-label="Share on Facebook">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+          </button>
+          <button class="share-btn" id="share-email" title="Share via Email" aria-label="Share via Email">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 7l-10 7L2 7"/></svg>
+          </button>
+          <button class="share-btn" id="share-copy" title="Copy link" aria-label="Copy link">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            <span class="copy-toast">Copied!</span>
+          </button>
+        </span>
+      </p>
     </div>
   </header>
 
@@ -62,15 +94,16 @@
 
   <footer class="site-footer">
     <div class="footer-links">
-      <a href="https://www.nbcolympics.com/schedule/" target="_blank" rel="noopener">NBC Olympics Schedule</a>
-      <a href="https://www.olympics.com/en/milano-cortina-2026/schedule" target="_blank" rel="noopener">Olympics.com Schedule</a>
+      <a href="https://ysausa.org/parkcitynation/" target="_blank" rel="noopener">Park City Nation / YSA</a>
+      <a href="https://www.nbcolympics.com/schedule" target="_blank" rel="noopener">NBC Schedule</a>
+      <a href="https://www.olympics.com/en/milano-cortina-2026/schedule" target="_blank" rel="noopener">Olympics.com</a>
     </div>
-    <p>Athlete data from Park City Nation / Youth Sports Alliance. Not affiliated with the IOC.</p>
+    <p>Not affiliated with the IOC or any National Olympic Committee.</p>
   </footer>
 
-  <script src="js/config.js?v=8"></script>
-  <script src="js/athletes.js?v=8"></script>
-  <script src="js/schedule.js?v=8"></script>
-  <script src="js/app.js?v=8"></script>
+  <script src="js/config.js?v=11"></script>
+  <script src="js/athletes.js?v=11"></script>
+  <script src="js/schedule.js?v=11"></script>
+  <script src="js/app.js?v=11"></script>
 </body>
 </html>
