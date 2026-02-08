@@ -539,6 +539,7 @@ body {
   font-weight: 500;
   color: var(--text-secondary);
   margin-bottom: 0.1rem;
+  line-height: 1.3;
 }
 
 .event-details {
@@ -731,6 +732,8 @@ body {
   display: flex;
   align-items: center;
   font-size: 0.78rem;
+  gap: 0.4rem;
+  line-height: 1.3;
 }
 
 .event-card .event-summary {
