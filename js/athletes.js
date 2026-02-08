@@ -2,7 +2,7 @@
  * athletes.js - Fetch and parse athlete roster from Google Sheets or local CSV fallback.
  */
 var Athletes = (function () {
-  var CACHE_KEY = 'utah_olympics_athletes_v3';
+  var CACHE_KEY = 'utah_olympics_athletes_v4';
 
   /**
    * Parse a CSV string into an array of objects.

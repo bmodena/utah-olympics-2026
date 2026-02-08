@@ -13,7 +13,12 @@
       "Bash(sips:*)",
       "Bash(ls:*)",
       "WebFetch(domain:odf.olympictech.org)",
-      "WebFetch(domain:www.teamusa.com)"
+      "WebFetch(domain:www.teamusa.com)",
+      "WebFetch(domain:www.nbcolympics.com)",
+      "WebFetch(domain:www.nbc.com)",
+      "WebFetch(domain:deadline.com)",
+      "WebFetch(domain:www.sportsmediawatch.com)",
+      "Bash(cat:*)"
     ]
   }
 }

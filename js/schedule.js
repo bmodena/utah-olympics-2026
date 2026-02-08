@@ -160,6 +160,18 @@ var Schedule = (function () {
 
       var cleaned = cleanDiscipline(e.discipline);
 
+      // Reclassify snowboard events the API puts under Freestyle Skiing
+      var rawDiscLower = (e.discipline || '').toLowerCase();
+      if (sport === 'Freestyle Skiing' && (
+        rawDiscLower.indexOf('sbd ') !== -1 ||
+        rawDiscLower.indexOf('pgs ') !== -1 ||
+        rawDiscLower.indexOf('pgs') === 0 ||
+        rawDiscLower.indexOf('snowboard') !== -1 ||
+        rawDiscLower.indexOf('sbx') !== -1
+      )) {
+        sport = 'Snowboard';
+      }
+
       // Detect event gender from ALL raw API text before cleaning strips it
       var genderSource = [
         e.discipline || '',
@@ -339,17 +351,22 @@ var Schedule = (function () {
   };
 
   /**
-   * Discipline matching map: maps athlete discipline/sport to schedule event disciplines.
+   * Event alias map: maps athlete Event column values to API text patterns.
+   * Handles API abbreviations and naming differences.
    */
-  var disciplineMap = {
-    'freestyle aerials': ['aerials'],
-    'freestyle moguls': ['moguls'],
-    'freeski halfpipe': ['halfpipe', 'freeski halfpipe'],
-    'freeski slopestyle & big air': ['slopestyle', 'big air', 'freeski slopestyle', 'freeski big air'],
-    'snowboard cross': ['snowboard cross', 'cross'],
-    'snowboard halfpipe': ['halfpipe', 'snowboard halfpipe'],
-    'snowboard slopestyle': ['slopestyle', 'snowboard slopestyle'],
-    'snowboard big air': ['big air', 'snowboard big air']
+  var eventAliases = {
+    'four-man': ['4-man'],
+    'two-man': ['2-man'],
+    'pairs': ['pair skating', 'pairs'],
+    'team event': ['team event'],
+    'single skating': ['single skating'],
+    'big air': ['big air', ' ba '],
+    'halfpipe': ['halfpipe', ' hp '],
+    'slopestyle': ['slopestyle'],
+    'parallel giant slalom': ['pgs', 'parallel giant slalom'],
+    'snowboard cross': ['snowboard cross', 'sbx', 'sbd cross'],
+    'skeleton': ['skeleton', 'heat'],
+    'individual': ['individual', 'ind.']
   };
 
   function normalizeSport(name) {
@@ -359,9 +376,28 @@ var Schedule = (function () {
   }
 
   /**
+   * Check if an athlete's event matches the schedule event text.
+   * Uses eventAliases for API abbreviation handling.
+   */
+  function eventMatches(athleteEvent, evtText) {
+    var ev = athleteEvent.toLowerCase();
+    // Direct substring match
+    if (evtText.indexOf(ev) !== -1) return true;
+    // Check aliases
+    var aliases = eventAliases[ev];
+    if (aliases) {
+      return aliases.some(function (a) {
+        return evtText.indexOf(a) !== -1;
+      });
+    }
+    return false;
+  }
+
+  /**
    * Match schedule events to athletes.
    * Returns enriched schedule entries with matched athletes.
-   * Filters by gender when the event name specifies Men's or Women's.
+   * Uses athlete Events column for strict matching.
+   * Filters by gender when the event specifies Men's or Women's.
    */
   function matchScheduleToAthletes(schedule, athletes) {
     var sportMap = {};
@@ -382,38 +418,21 @@ var Schedule = (function () {
         });
       }
 
+      // Strict matching on athlete Events column
       if (matched.length > 0) {
         var evtDisc = (evt.discipline || '').toLowerCase().trim();
         var evtEvent = (evt.event || '').toLowerCase().trim();
-        var evtText = evtDisc + ' ' + evtEvent;
+        var evtText = ' ' + evtDisc + ' ' + evtEvent + ' ';
 
-        var narrowed = matched.filter(function (ath) {
-          // Use events array for precise matching if available
+        matched = matched.filter(function (ath) {
           if (ath.events && ath.events.length > 0) {
             return ath.events.some(function (ev) {
-              return evtText.indexOf(ev.toLowerCase()) !== -1;
+              return eventMatches(ev, evtText);
             });
           }
-
-          // Fallback to discipline-based matching
-          var athSportLower = ath.sport.toLowerCase().trim();
-          var athDiscLower = (ath.discipline || '').toLowerCase().trim();
-
-          var aliases = disciplineMap[athSportLower];
-          if (aliases) {
-            return aliases.some(function (a) {
-              return evtDisc.indexOf(a) !== -1;
-            });
-          }
-          if (athDiscLower) {
-            return evtDisc.indexOf(athDiscLower) !== -1 ||
-              athDiscLower.indexOf(evtDisc) !== -1;
-          }
+          // No events defined — include as fallback
           return true;
         });
-        if (narrowed.length > 0) {
-          matched = narrowed;
-        }
       }
 
       return {
