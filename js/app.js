@@ -247,6 +247,7 @@
         sport: sport ? sport.textContent : ''
       });
     }
+    postHeight();
   };
 
   window._toggleAthlete = function (row) {
@@ -257,6 +258,7 @@
         athlete_name: name ? name.textContent : ''
       });
     }
+    postHeight();
   };
 
   window._trackCal = function (provider) {
@@ -471,6 +473,7 @@
       });
       html += '</div>';
       container.innerHTML = html;
+      postHeight();
       return;
     }
 
@@ -598,6 +601,8 @@
       scrollToToday();
       initialScrollDone = true;
     }
+
+    postHeight();
   }
 
   /**
@@ -770,7 +775,8 @@
       var desc = document.getElementById('install-banner-desc');
       var DISMISS_KEY = 'pc_olympics_install_dismissed';
 
-      // Already dismissed or already running as installed PWA
+      // Skip inside iframes, already dismissed, or already running as installed PWA
+      if (window.self !== window.top) return;
       if (localStorage.getItem(DISMISS_KEY)) return;
       if (window.matchMedia('(display-mode: standalone)').matches) return;
       if (window.navigator.standalone === true) return; // iOS standalone
@@ -891,6 +897,18 @@
         '</div>';
     });
   }
+
+  // Broadcast height to parent when embedded in an iframe
+  function postHeight() {
+    if (window.self !== window.top) {
+      try {
+        var h = document.documentElement.scrollHeight;
+        window.parent.postMessage({ type: 'pc-olympics-resize', height: h }, '*');
+      } catch (e) { /* cross-origin — ignore */ }
+    }
+  }
+
+  window.addEventListener('resize', postHeight);
 
   // Start on DOM ready
   if (document.readyState === 'loading') {
