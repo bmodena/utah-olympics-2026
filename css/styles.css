@@ -243,6 +243,22 @@ body {
   padding-top: 0.5rem;
 }
 
+.date-athletes {
+  font-size: 0.82rem;
+  color: var(--text-primary);
+  font-weight: 500;
+  margin-top: 0.25rem;
+  margin-bottom: 0.15rem;
+  line-height: 1.4;
+}
+
+.date-athletes-note {
+  font-weight: 400;
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
 /* Athlete view header */
 .athlete-header {
   display: flex;
@@ -789,6 +805,110 @@ body {
   stroke: white;
 }
 
+/* ===== Athlete View — Compact Expandable List ===== */
+.athlete-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.athlete-list-note {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  font-style: italic;
+  margin-bottom: 0.5rem;
+}
+
+.athlete-row {
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  border-left: 3px solid var(--park-city-accent);
+  cursor: pointer;
+  transition: box-shadow 0.15s ease;
+  overflow: hidden;
+}
+
+.athlete-row:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.athlete-row-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 0.75rem;
+  flex-wrap: wrap;
+}
+
+.athlete-row-name {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--text-primary);
+}
+
+.athlete-row-sport {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.athlete-row-count {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--olympic-blue);
+  background: #f5ebe8;
+  padding: 0.1rem 0.4rem;
+  border-radius: 9999px;
+}
+
+.athlete-row-header .expand-toggle {
+  margin-left: auto;
+}
+
+.athlete-row-events {
+  display: none;
+  padding: 0 0.75rem 0.6rem;
+}
+
+.athlete-row.expanded .athlete-row-events {
+  display: block;
+}
+
+.athlete-row.expanded .expand-toggle::after {
+  content: '\25BE';
+}
+
+.athlete-event-item {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  padding: 0.3rem 0;
+  border-top: 1px solid var(--border-color);
+  font-size: 0.82rem;
+}
+
+.athlete-event-date {
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  white-space: nowrap;
+}
+
+.athlete-event-time {
+  color: var(--olympic-blue);
+  font-weight: 600;
+  font-size: 0.78rem;
+  white-space: nowrap;
+}
+
+.athlete-event-name {
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.past-event-text {
+  opacity: 0.5;
+}
+
 /* ===== No Results ===== */
 .no-results {
   text-align: center;
@@ -907,6 +1027,22 @@ body {
 
   .athlete-tag {
     font-size: 0.78rem;
+  }
+
+  .athlete-row-header {
+    padding: 0.65rem 1rem;
+  }
+
+  .athlete-row-name {
+    font-size: 1rem;
+  }
+
+  .athlete-row-events {
+    padding: 0 1rem 0.75rem;
+  }
+
+  .athlete-event-item {
+    font-size: 0.85rem;
   }
 
   .site-footer {

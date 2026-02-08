@@ -4,7 +4,6 @@
 (function () {
   // State
   var allEvents = [];
-  var currentFilter = 'all'; // 'all' | 'parkCity'
   var currentSort = 'date';  // 'date' | 'sport' | 'athlete'
   var searchQuery = '';
   var initialScrollDone = false;
@@ -116,7 +115,7 @@
       lines.push('');
     }
     if (evt.athletes.length > 0) {
-      lines.push('Utah / Park City Athletes:');
+      lines.push('Park City Athletes:');
       evt.athletes.forEach(function (a) {
         var line = '- ' + a.name;
         if (a.isParkCity) line += ' (Park City)';
@@ -258,15 +257,6 @@
   function getFilteredEvents() {
     var events = allEvents;
 
-    // Filter by Park City
-    if (currentFilter === 'parkCity') {
-      events = events.map(function (evt) {
-        var pcAthletes = evt.athletes.filter(function (a) { return a.isParkCity; });
-        if (pcAthletes.length === 0) return null;
-        return Object.assign({}, evt, { athletes: pcAthletes });
-      }).filter(Boolean);
-    }
-
     // Search
     if (searchQuery) {
       var q = searchQuery.toLowerCase();
@@ -370,13 +360,41 @@
     var sortedKeys = Object.keys(groups);
     if (isAthleteView) sortedKeys.sort();
 
+    // Athlete view: compact expandable list
+    if (isAthleteView) {
+      html += '<div class="athlete-list">';
+      html += '<p class="athlete-list-note">Qualified to compete, may not have advanced to finals</p>';
+      sortedKeys.forEach(function (key) {
+        var athInfo = athleteInfoMap[key] || {};
+        var country = athInfo.country && athInfo.country !== 'USA' ? ' (' + escapeHTML(athInfo.country) + ')' : '';
+        var evts = groups[key];
+        html += '<div class="athlete-row" onclick="this.classList.toggle(\'expanded\')">';
+        html += '<div class="athlete-row-header">';
+        html += '<span class="athlete-row-name">' + escapeHTML(key) + country + '</span>';
+        html += '<span class="athlete-row-sport">' + escapeHTML(athInfo.sport || '') + '</span>';
+        html += '<span class="athlete-row-count">' + evts.length + ' event' + (evts.length !== 1 ? 's' : '') + '</span>';
+        html += '<span class="expand-toggle"></span>';
+        html += '</div>';
+        html += '<div class="athlete-row-events">';
+        evts.forEach(function (evt) {
+          var pastClass = isPastDate(evt.date) ? ' past-event-text' : '';
+          html += '<div class="athlete-event-item' + pastClass + '">';
+          html += '<span class="athlete-event-date">' + escapeHTML(formatDate(evt.date)) + '</span>';
+          html += '<span class="athlete-event-time">' + escapeHTML(formatTime(evt.time, evt.date)) + '</span>';
+          html += '<span class="athlete-event-name">' + escapeHTML(evt.event || evt.discipline || '') + '</span>';
+          html += '</div>';
+        });
+        html += '</div>';
+        html += '</div>';
+      });
+      html += '</div>';
+      container.innerHTML = html;
+      return;
+    }
+
     sortedKeys.forEach(function (key) {
       var groupLabel, isPast, isToday;
-      if (isAthleteView) {
-        groupLabel = key;
-        isPast = false;
-        isToday = false;
-      } else if (currentSort === 'sport') {
+      if (currentSort === 'sport') {
         groupLabel = key;
         isPast = false;
         isToday = false;
@@ -386,24 +404,31 @@
         isToday = key === todayStr;
       }
       var groupClass = 'date-group';
-      if (isAthleteView) groupClass += ' athlete-group';
       if (isPast) groupClass += ' past-group';
       if (isToday) groupClass += ' today-group';
       html += '<div class="' + groupClass + '" data-date="' + escapeHTML(key) + '">';
 
-      if (isAthleteView) {
-        var athInfo = athleteInfoMap[key] || {};
-        html += '<h2 class="date-header athlete-header">';
-        html += '<span class="athlete-header-name">' + escapeHTML(key) + '</span>';
-        if (athInfo.isParkCity) html += ' <span class="badge">PC</span>';
-        if (athInfo.country && athInfo.country !== 'USA') html += ' <span class="athlete-country">(' + escapeHTML(athInfo.country) + ')</span>';
-        html += '<span class="athlete-header-meta">' + getSportIcon(athInfo.sport) + ' ' + escapeHTML(athInfo.sport || '');
-        if (athInfo.discipline) html += ' &mdash; ' + escapeHTML(athInfo.discipline);
-        html += '</span>';
-        html += '</h2>';
-      } else {
-        var todayBadge = isToday ? '<span class="today-badge">Today</span>' : '';
-        html += '<h2 class="date-header">' + escapeHTML(groupLabel) + todayBadge + '</h2>';
+      var todayBadge = isToday ? '<span class="today-badge">Today</span>' : '';
+      html += '<h2 class="date-header">' + escapeHTML(groupLabel) + todayBadge + '</h2>';
+
+      // Collect unique athletes for this group (date or sport view)
+      if (currentSort === 'date' || currentSort === 'sport') {
+        var seen = {};
+        var dateAthletes = [];
+        groups[key].forEach(function (evt) {
+          evt.athletes.forEach(function (a) {
+            if (!seen[a.name]) {
+              seen[a.name] = true;
+              var label = a.name;
+              if (a.country && a.country !== 'USA') label += ' (' + a.country + ')';
+              dateAthletes.push(label);
+            }
+          });
+        });
+        if (dateAthletes.length > 0) {
+          html += '<p class="date-athletes">' + escapeHTML(dateAthletes.join(', ')) +
+            ' <span class="date-athletes-note">&mdash; qualified to compete, may not have advanced to finals</span></p>';
+        }
       }
 
       groups[key].forEach(function (evt) {
@@ -454,7 +479,7 @@
         html += '</div>';
         html += '<div class="event-expanded">';
         if (athleteTags) {
-          html += '<div class="event-athletes"><span class="athletes-label">Utah athletes qualified for this event (may not have advanced to finals):</span>' + athleteTags + '</div>';
+          html += '<div class="event-athletes"><span class="athletes-label">Park City athletes qualified for this event (may not have advanced to finals):</span>' + athleteTags + '</div>';
         }
         if (evt.venue) {
           html += '<div class="event-venue">' + escapeHTML(evt.venue) + '</div>';
@@ -526,21 +551,6 @@
   }
 
   /**
-   * Set up filter buttons.
-   */
-  function initFilters() {
-    var btns = document.querySelectorAll('.filter-btn');
-    btns.forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        btns.forEach(function (b) { b.classList.remove('active'); });
-        btn.classList.add('active');
-        currentFilter = btn.dataset.filter;
-        render();
-      });
-    });
-  }
-
-  /**
    * Set up sort buttons.
    */
   function initSort() {
@@ -588,7 +598,6 @@
    * Main init: fetch data, match, render.
    */
   function init() {
-    initFilters();
     initSort();
     initSearch();
 

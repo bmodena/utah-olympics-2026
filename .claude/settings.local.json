@@ -19,7 +19,8 @@
       "WebFetch(domain:deadline.com)",
       "WebFetch(domain:www.sportsmediawatch.com)",
       "Bash(cat:*)",
-      "Bash(xxd:*)"
+      "Bash(xxd:*)",
+      "Bash(/tmp/match_events.py:*)"
     ]
   }
 }
