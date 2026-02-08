@@ -98,6 +98,8 @@ var Schedule = (function () {
 
   /**
    * Fetch raw schedule data from the RapidAPI Milano Cortina 2026 endpoint.
+   * Falls back to local data/schedule-cache.json if the API is unavailable
+   * (rate-limited, down, etc.).
    *
    * @param {string} apiKey - RapidAPI key from CONFIG
    * @returns {Promise<Object[]>} Normalized event objects
@@ -112,6 +114,25 @@ var Schedule = (function () {
       }
     }).then(function (res) {
       if (!res.ok) throw new Error('RapidAPI fetch failed: ' + res.status);
+      return res.json();
+    }).then(function (data) {
+      return normalizeAPIData(data);
+    }).catch(function (err) {
+      console.warn('RapidAPI failed (' + err.message + '), using local schedule fallback');
+      return fetchLocalSchedule();
+    });
+  }
+
+  /**
+   * Fetch schedule from the local static JSON fallback file.
+   * Used when the RapidAPI endpoint is rate-limited or unavailable.
+   *
+   * @returns {Promise<Object[]>} Normalized event objects
+   */
+  function fetchLocalSchedule() {
+    var path = CONFIG.FALLBACK_SCHEDULE || 'data/schedule-cache.json';
+    return fetch(path).then(function (res) {
+      if (!res.ok) throw new Error('Local schedule fallback failed: ' + res.status);
       return res.json();
     }).then(function (data) {
       return normalizeAPIData(data);

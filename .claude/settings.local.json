@@ -23,7 +23,9 @@
       "Bash(/tmp/match_events.py:*)",
       "WebFetch(domain:api.olympics.com)",
       "Bash(find:*)",
-      "Bash(wc:*)"
+      "Bash(wc:*)",
+      "WebFetch(domain:utah2026.townlift.com)",
+      "Bash(vercel --version:*)"
     ]
   }
 }
