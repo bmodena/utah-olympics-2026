@@ -39,9 +39,16 @@ var Schedule = (function () {
   var BROADCAST_CACHE_KEY = 'utah_olympics_broadcast_v1';
 
   /**
-   * Get cache TTL based on whether we're in the Olympic competition window.
-   * During the Games (Feb 6–22, 2026): 4 hours for fresher data.
-   * Otherwise: 24 hours to minimize API calls.
+   * Cache TTL: how long localStorage data is considered "fresh" before
+   * we attempt a background API refresh.
+   *
+   * 15 minutes during the Olympic competition window (Feb 6–22, 2026)
+   * keeps data reasonably current without hammering the API.
+   * 24 hours off-season since data rarely changes.
+   *
+   * IMPORTANT: This TTL does NOT block page load. The page always renders
+   * immediately from cache or static fallback. Stale cache only triggers a
+   * background API call to update data for the NEXT page load.
    *
    * @returns {number} TTL in milliseconds
    */
@@ -49,8 +56,8 @@ var Schedule = (function () {
     var now = new Date();
     var start = new Date('2026-02-06T00:00:00');
     var end = new Date('2026-02-23T00:00:00');
-    if (now >= start && now <= end) return 4 * 60 * 60 * 1000;
-    return 24 * 60 * 60 * 1000;
+    if (now >= start && now <= end) return 15 * 60 * 1000; // 15 minutes
+    return 24 * 60 * 60 * 1000; // 24 hours
   }
 
   /**
@@ -506,28 +513,47 @@ var Schedule = (function () {
   // =====================================================================
 
   /**
-   * Main entry: fetch schedule from API (with cache) and apply broadcast rules.
+   * Read cached data from localStorage, returning it even if stale.
+   * Returns { data, isStale } so the caller can decide whether to refresh.
+   *
+   * @param {string} key - localStorage key
+   * @returns {{ data: *, isStale: boolean } | null}
+   */
+  function getCacheWithAge(key) {
+    try {
+      var raw = localStorage.getItem(key);
+      if (!raw) return null;
+      var cached = JSON.parse(raw);
+      if (!cached.data) return null;
+      var isStale = (Date.now() - cached.timestamp) > getCacheTTL();
+      return { data: cached.data, isStale: isStale };
+    } catch (e) { return null; }
+  }
+
+  /**
+   * Main entry: fetch schedule and apply broadcast rules.
+   *
+   * Strategy (designed to minimize API calls under high traffic):
+   *
+   *   1. FRESH CACHE → serve immediately, no API call at all
+   *   2. STALE CACHE → serve immediately, kick off background API refresh
+   *      for the next page load
+   *   3. NO CACHE → load from static data/schedule-cache.json (instant,
+   *      no API call), then kick off background API refresh
+   *
+   * The API is NEVER called synchronously in the page load path when cache
+   * exists. This means even if the API is rate-limited or down, the page
+   * always loads with data.
+   *
+   * Append ?refresh to the URL to force a synchronous API fetch.
    *
    * @returns {Promise<Object[]>} Array of normalized events with broadcast info
-   * @throws {Error} If no RapidAPI key is configured
    */
   function fetchSchedule() {
     var apiKey = CONFIG.RAPIDAPI_KEY;
-    if (!apiKey) {
-      return Promise.reject(new Error('No RapidAPI key configured. Add your key in js/config.js.'));
-    }
 
-    var cachedSchedule = getCache(SCHEDULE_CACHE_KEY);
+    // Broadcast rules (small, rarely changes — simple cache-or-fetch)
     var cachedBroadcast = getCache(BROADCAST_CACHE_KEY);
-
-    // Fetch schedule and broadcast rules in parallel
-    var schedulePromise = cachedSchedule
-      ? Promise.resolve(cachedSchedule)
-      : fetchFromAPI(apiKey).then(function (events) {
-          setCache(SCHEDULE_CACHE_KEY, events);
-          return events;
-        });
-
     var broadcastPromise = cachedBroadcast
       ? Promise.resolve(cachedBroadcast)
       : fetchBroadcastRules().then(function (rules) {
@@ -535,11 +561,85 @@ var Schedule = (function () {
           return rules;
         });
 
-    return Promise.all([schedulePromise, broadcastPromise]).then(function (results) {
-      var events = results[0];
-      var rules = results[1];
-      return applyBroadcastRules(events, rules);
+    // ?refresh forces a live API fetch (bypasses all caches)
+    if (forceRefresh() && apiKey) {
+      return Promise.all([
+        fetchFromAPI(apiKey).then(function (events) {
+          setCache(SCHEDULE_CACHE_KEY, events);
+          return events;
+        }),
+        broadcastPromise
+      ]).then(function (results) {
+        return applyBroadcastRules(results[0], results[1]);
+      });
+    }
+
+    // Check localStorage cache (returns data even if stale)
+    var cached = getCacheWithAge(SCHEDULE_CACHE_KEY);
+
+    if (cached && !cached.isStale) {
+      // FRESH CACHE: serve immediately, zero API calls
+      return broadcastPromise.then(function (rules) {
+        return applyBroadcastRules(cached.data, rules);
+      });
+    }
+
+    if (cached && cached.isStale) {
+      // STALE CACHE: serve immediately, refresh in background for next load
+      if (apiKey) {
+        backgroundRefresh(apiKey);
+      }
+      return broadcastPromise.then(function (rules) {
+        return applyBroadcastRules(cached.data, rules);
+      });
+    }
+
+    // NO CACHE: load from static fallback file (instant, no API call)
+    var schedulePromise = fetchLocalSchedule().then(function (events) {
+      setCache(SCHEDULE_CACHE_KEY, events);
+      return events;
     });
+
+    // Kick off background API refresh so next load has fresh data
+    if (apiKey) {
+      backgroundRefresh(apiKey);
+    }
+
+    return Promise.all([schedulePromise, broadcastPromise]).then(function (results) {
+      return applyBroadcastRules(results[0], results[1]);
+    });
+  }
+
+  /**
+   * Silently fetch fresh data from the API and update localStorage.
+   * Runs in the background — does not block page rendering.
+   * Failures are silently ignored (cached/static data is already showing).
+   *
+   * @param {string} apiKey - RapidAPI key
+   */
+  function backgroundRefresh(apiKey) {
+    setTimeout(function () {
+      var url = 'https://' + CONFIG.RAPIDAPI_HOST + '/events';
+      fetch(url, {
+        method: 'GET',
+        headers: {
+          'X-RapidAPI-Key': apiKey,
+          'X-RapidAPI-Host': CONFIG.RAPIDAPI_HOST
+        }
+      }).then(function (res) {
+        if (!res.ok) return;
+        return res.json();
+      }).then(function (data) {
+        if (data) {
+          var events = normalizeAPIData(data);
+          if (events.length > 0) {
+            setCache(SCHEDULE_CACHE_KEY, events);
+          }
+        }
+      }).catch(function () {
+        // Silently ignore — user already has data showing
+      });
+    }, 2000); // Delay 2s so it doesn't compete with initial render
   }
 
   // =====================================================================
