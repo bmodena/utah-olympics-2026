@@ -762,6 +762,83 @@
       track('share', { method: 'copy_link' });
     });
 
+    // Install banner (Add to Home Screen)
+    (function () {
+      var banner = document.getElementById('install-banner');
+      var actionBtn = document.getElementById('install-banner-action');
+      var closeBtn = document.getElementById('install-banner-close');
+      var desc = document.getElementById('install-banner-desc');
+      var DISMISS_KEY = 'pc_olympics_install_dismissed';
+
+      // Already dismissed or already running as installed PWA
+      if (localStorage.getItem(DISMISS_KEY)) return;
+      if (window.matchMedia('(display-mode: standalone)').matches) return;
+      if (window.navigator.standalone === true) return; // iOS standalone
+
+      var isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+      var isAndroid = /android/i.test(navigator.userAgent);
+      var deferredPrompt = null;
+
+      function showBanner() {
+        banner.classList.remove('hidden');
+        track('install_banner_shown');
+      }
+
+      function dismiss() {
+        banner.classList.add('hidden');
+        localStorage.setItem(DISMISS_KEY, '1');
+      }
+
+      closeBtn.addEventListener('click', function () {
+        dismiss();
+        track('install_banner_dismiss');
+      });
+
+      if (isIOS) {
+        desc.textContent = 'Tap the share button, then "Add to Home Screen"';
+        actionBtn.textContent = 'Got it';
+        actionBtn.addEventListener('click', function () {
+          dismiss();
+          track('install_banner_action', { platform: 'ios' });
+        });
+        setTimeout(showBanner, 2000);
+      } else {
+        // Android / Chrome — capture native install prompt
+        window.addEventListener('beforeinstallprompt', function (e) {
+          e.preventDefault();
+          deferredPrompt = e;
+          desc.textContent = 'Quick access to Park City Olympic events';
+          actionBtn.textContent = 'Add';
+          setTimeout(showBanner, 2000);
+        });
+
+        actionBtn.addEventListener('click', function () {
+          if (deferredPrompt) {
+            deferredPrompt.prompt();
+            deferredPrompt.userChoice.then(function (result) {
+              track('install_banner_action', { platform: 'android', outcome: result.outcome });
+              deferredPrompt = null;
+              dismiss();
+            });
+          } else {
+            dismiss();
+          }
+        });
+
+        // Fallback for Android browsers without beforeinstallprompt
+        if (isAndroid) {
+          setTimeout(function () {
+            if (!deferredPrompt) {
+              desc.textContent = 'Tap your browser menu, then "Add to Home Screen"';
+              actionBtn.textContent = 'Got it';
+              actionBtn.addEventListener('click', dismiss);
+              showBanner();
+            }
+          }, 3000);
+        }
+      }
+    })();
+
     // Track footer link clicks
     document.querySelectorAll('.footer-links a').forEach(function (link) {
       link.addEventListener('click', function () {

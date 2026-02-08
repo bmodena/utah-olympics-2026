@@ -24,10 +24,13 @@
   <link rel="icon" type="image/x-icon" href="/favicon.ico">
   <link rel="manifest" href="/site.webmanifest">
   <meta name="theme-color" content="#993820">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="PC Olympics">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css?v=13">
+  <link rel="stylesheet" href="css/styles.css?v=14">
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-T2RPDQ96M7"></script>
   <script>
@@ -118,9 +121,20 @@
     <p>Not affiliated with the IOC or any National Olympic Committee.</p>
   </footer>
 
-  <script src="js/config.js?v=13"></script>
-  <script src="js/athletes.js?v=13"></script>
-  <script src="js/schedule.js?v=13"></script>
-  <script src="js/app.js?v=13"></script>
+  <div class="install-banner hidden" id="install-banner">
+    <div class="install-banner-content">
+      <div class="install-banner-text">
+        <strong>Add to Home Screen</strong>
+        <span class="install-banner-desc" id="install-banner-desc">Quick access to Park City Olympic events</span>
+      </div>
+      <button class="install-banner-action" id="install-banner-action">Add</button>
+      <button class="install-banner-close" id="install-banner-close" aria-label="Dismiss">&times;</button>
+    </div>
+  </div>
+
+  <script src="js/config.js?v=14"></script>
+  <script src="js/athletes.js?v=14"></script>
+  <script src="js/schedule.js?v=14"></script>
+  <script src="js/app.js?v=14"></script>
 </body>
 </html>

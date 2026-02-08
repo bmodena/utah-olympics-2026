@@ -1,6 +1,7 @@
 {
-  "name": "Utah at the 2026 Winter Olympics",
-  "short_name": "Utah 2026",
+  "name": "Park City at the 2026 Winter Olympics",
+  "short_name": "PC Olympics",
+  "description": "Track Park City athletes competing in Milano Cortina 2026",
   "icons": [
     {
       "src": "/android-chrome-192x192.png",
@@ -16,5 +17,6 @@
   "theme_color": "#993820",
   "background_color": "#f5f1eb",
   "display": "standalone",
-  "start_url": "/"
+  "start_url": "/",
+  "scope": "/"
 }
