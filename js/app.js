@@ -51,7 +51,7 @@
   var athleteInfoMap = {};
 
   /** @type {Object} Whitelist of valid URL hash view names */
-  var VALID_VIEWS = { date: true, sport: true, athlete: true };
+  var VALID_VIEWS = { date: true, sport: true, athlete: true, medals: true };
 
   // =====================================================================
   // Analytics
@@ -98,7 +98,7 @@
   }
 
   /** @type {Object} Maps view keys to display labels for the controls bar */
-  var VIEW_LABELS = { date: 'Date', sport: 'Sport', athlete: 'Athlete' };
+  var VIEW_LABELS = { date: 'Date', sport: 'Sport', athlete: 'Athlete', medals: 'Medals' };
 
   function syncSortButtons() {
     var btns = document.querySelectorAll('.sort-btn');
@@ -547,6 +547,14 @@
    */
   function render() {
     var container = document.getElementById('schedule-container');
+    var controlsEl = document.getElementById('controls');
+
+    // Medals page — special view, bypass normal rendering
+    if (currentSort === 'medals') {
+      renderMedalsPage(container);
+      return;
+    }
+
     var events = getFilteredEvents();
     _renderedEvents = events;
 
@@ -567,33 +575,98 @@
     var sortedKeys = Object.keys(groups);
     if (isAthleteView) sortedKeys.sort();
 
-    // Athlete view: compact expandable list
+    // Athlete view: compact expandable list split by completed/upcoming
     if (isAthleteView) {
+      // Build athlete groups from ALL events (ignore showPast filter)
+      var allAthleteGroups = groupEvents(allEvents);
+      var allAthleteKeys = Object.keys(allAthleteGroups).sort();
+      var today = getTodayStr();
+
+      // Apply search filter if active
+      if (searchQuery) {
+        var q = searchQuery.toLowerCase();
+        allAthleteKeys = allAthleteKeys.filter(function (key) {
+          if (key.toLowerCase().indexOf(q) !== -1) return true;
+          var info = athleteInfoMap[key] || {};
+          if ((info.sport || '').toLowerCase().indexOf(q) !== -1) return true;
+          return allAthleteGroups[key].some(function (evt) {
+            return evt.event.toLowerCase().indexOf(q) !== -1 ||
+              (evt.discipline || '').toLowerCase().indexOf(q) !== -1;
+          });
+        });
+      }
+
+      // Split athletes into those with completed (past) events and upcoming
+      var completedAthletes = [];
+      var upcomingAthletes = [];
+      allAthleteKeys.forEach(function (key) {
+        var evts = allAthleteGroups[key];
+        var hasCompleted = evts.some(function (e) { return isPastDate(e.date); });
+        if (hasCompleted) {
+          completedAthletes.push(key);
+        }
+        var hasUpcoming = evts.some(function (e) { return !isPastDate(e.date); });
+        if (hasUpcoming) {
+          upcomingAthletes.push(key);
+        }
+      });
+
       html += '<div class="athlete-list">';
-      html += '<p class="athlete-list-note">Qualified to compete, may not have advanced to finals</p>';
-      sortedKeys.forEach(function (key) {
-        var athInfo = athleteInfoMap[key] || {};
-        var country = athInfo.country && athInfo.country !== 'USA' ? ' (' + escapeHTML(athInfo.country) + ')' : '';
-        var evts = groups[key];
-        html += '<div class="athlete-row" onclick="_toggleAthlete(this)">';
-        html += '<div class="athlete-row-header">';
-        html += '<span class="athlete-row-name">' + escapeHTML(key) + country + '</span>';
-        html += '<span class="athlete-row-sport">' + escapeHTML(athInfo.sport || '') + '</span>';
-        html += '<span class="athlete-row-count">' + evts.length + ' event' + (evts.length !== 1 ? 's' : '') + '</span>';
-        html += '<span class="expand-toggle"></span>';
-        html += '</div>';
-        html += '<div class="athlete-row-events">';
-        evts.forEach(function (evt) {
-          var pastClass = isPastDate(evt.date) ? ' past-event-text' : '';
-          html += '<div class="athlete-event-item' + pastClass + '">';
-          html += '<span class="athlete-event-date">' + escapeHTML(formatDate(evt.date)) + '</span>';
-          html += '<span class="athlete-event-time">' + escapeHTML(formatTime(evt.time, evt.date)) + '</span>';
-          html += '<span class="athlete-event-name">' + escapeHTML(evt.event || evt.discipline || '') + '</span>';
+
+      // --- Completed Events Section ---
+      if (completedAthletes.length > 0) {
+        html += '<div class="athlete-section-header">Completed Events</div>';
+        completedAthletes.forEach(function (key) {
+          var athInfo = athleteInfoMap[key] || {};
+          var country = athInfo.country && athInfo.country !== 'USA' ? ' (' + escapeHTML(athInfo.country) + ')' : '';
+          var evts = allAthleteGroups[key].filter(function (e) {
+            return isPastDate(e.date);
+          });
+          html += '<div class="athlete-completed-row">';
+          html += '<span class="athlete-completed-name">' + escapeHTML(key) + country + '</span>';
+          html += '<span class="athlete-completed-results">';
+          evts.forEach(function (evt, i) {
+            if (i > 0) html += '<span class="athlete-completed-sep">&middot;</span>';
+            html += '<span class="athlete-completed-event">' + escapeHTML(evt.event || evt.discipline || '') + '</span>';
+            if (evt.results && evt.results[key]) {
+              html += buildResultBadge(evt.results[key], true);
+            } else {
+              html += '<span class="result-badge-inline result-badge-pending">Pending Update</span>';
+            }
+          });
+          html += '</span>';
           html += '</div>';
         });
-        html += '</div>';
-        html += '</div>';
-      });
+      }
+
+      // --- Upcoming Events Section ---
+      if (upcomingAthletes.length > 0) {
+        html += '<div class="athlete-section-header">Upcoming Events</div>';
+        html += '<p class="athlete-list-note">Qualified to compete, may not have advanced to finals</p>';
+        upcomingAthletes.forEach(function (key) {
+          var athInfo = athleteInfoMap[key] || {};
+          var country = athInfo.country && athInfo.country !== 'USA' ? ' (' + escapeHTML(athInfo.country) + ')' : '';
+          var evts = allAthleteGroups[key].filter(function (e) { return !isPastDate(e.date); });
+          html += '<div class="athlete-row" onclick="_toggleAthlete(this)">';
+          html += '<div class="athlete-row-header">';
+          html += '<span class="athlete-row-name">' + escapeHTML(key) + country + '</span>';
+          html += '<span class="athlete-row-sport">' + escapeHTML(athInfo.sport || '') + '</span>';
+          html += '<span class="athlete-row-count">' + evts.length + ' event' + (evts.length !== 1 ? 's' : '') + '</span>';
+          html += '<span class="expand-toggle"></span>';
+          html += '</div>';
+          html += '<div class="athlete-row-events">';
+          evts.forEach(function (evt) {
+            html += '<div class="athlete-event-item">';
+            html += '<span class="athlete-event-date">' + escapeHTML(formatDate(evt.date)) + '</span>';
+            html += '<span class="athlete-event-time">' + escapeHTML(formatTime(evt.time, evt.date)) + '</span>';
+            html += '<span class="athlete-event-name">' + escapeHTML(evt.event || evt.discipline || '') + '</span>';
+            html += '</div>';
+          });
+          html += '</div>';
+          html += '</div>';
+        });
+      }
+
       html += '</div>';
       container.innerHTML = html;
       postHeight();
@@ -665,8 +738,12 @@
             var country = a.country && a.country !== 'USA'
               ? ' (' + escapeHTML(a.country) + ')'
               : '';
+            var resultBadge = '';
+            if (evt.results && evt.results[a.name]) {
+              resultBadge = buildResultBadge(evt.results[a.name], true);
+            }
             return '<span class="' + cls + '">' +
-              escapeHTML(a.name) + country + badge +
+              escapeHTML(a.name) + country + badge + resultBadge +
               '</span>';
           }).join('');
         }
@@ -686,6 +763,12 @@
         html += '<div class="event-summary">';
         html += '<span class="event-name-inline">' + escapeHTML(evt.event || evt.discipline || '') + '</span>';
         html += '<span class="event-sport-label">' + escapeHTML(evt.sport) + '</span>';
+        if (evt.results) {
+          var resultNames = Object.keys(evt.results);
+          for (var ri = 0; ri < resultNames.length; ri++) {
+            html += buildResultBadge(evt.results[resultNames[ri]]);
+          }
+        }
         html += '<span class="expand-toggle"></span>';
         html += '</div>';
         html += '<div class="event-expanded">';
@@ -961,10 +1044,12 @@
 
     Promise.all([
       Athletes.fetchAthletes(),
-      Schedule.fetchSchedule()
+      Schedule.fetchSchedule(),
+      Results.fetchResults()
     ]).then(function (results) {
       var athletes = results[0];
       var schedule = results[1];
+      var resultsData = results[2];
 
       if (!athletes || athletes.length === 0) {
         showStatus('No athlete data loaded. Check config or data/athletes-seed.csv.', 'error');
@@ -977,6 +1062,7 @@
       }
 
       allEvents = Schedule.matchScheduleToAthletes(schedule, athletes);
+      Results.mergeResults(allEvents, resultsData);
       track('data_loaded', { athletes: athletes.length, events: allEvents.length });
 
       if (allEvents.length === 0) {
@@ -993,6 +1079,7 @@
       }
 
       render();
+      renderMedalFooter();
     }).catch(function (err) {
       console.error('Init error:', err);
       showStatus('Error loading data: ' + err.message, 'error');
@@ -1024,6 +1111,173 @@
   }
 
   window.addEventListener('resize', postHeight);
+
+  // =====================================================================
+  // Result Badges & Medal Display
+  // =====================================================================
+
+  /**
+   * Build an HTML result badge pill.
+   * @param {string} result - "Gold", "Silver", "Bronze", or freeform text
+   * @param {boolean} [inline] - If true, use smaller inline variant
+   * @returns {string} HTML string
+   */
+  function buildResultBadge(result, inline) {
+    var lower = (result || '').toLowerCase();
+    var cls = 'result-badge';
+    if (inline) cls += ' result-badge-inline';
+    if (lower === 'gold') cls += ' result-badge-gold';
+    else if (lower === 'silver') cls += ' result-badge-silver';
+    else if (lower === 'bronze') cls += ' result-badge-bronze';
+    else cls += ' result-badge-other';
+    return '<span class="' + cls + '">' + escapeHTML(result) + '</span>';
+  }
+
+  /**
+   * Render the fixed medal footer bar if any medals exist.
+   */
+  function renderMedalFooter() {
+    var footer = document.getElementById('medal-footer');
+    if (!footer) return;
+
+    var counts = Results.getMedalCounts();
+
+    var content = footer.querySelector('.medal-footer-content');
+    var html = '<span class="medal-footer-label">Park City Medals</span>';
+    html += '<span class="medal-footer-item"><span class="medal-circle medal-circle-gold">' + counts.gold + '</span></span>';
+    html += '<span class="medal-footer-item"><span class="medal-circle medal-circle-silver">' + counts.silver + '</span></span>';
+    html += '<span class="medal-footer-item"><span class="medal-circle medal-circle-bronze">' + counts.bronze + '</span></span>';
+    html += '<span class="medal-footer-view-all">View All Results &#9654;</span>';
+    content.innerHTML = html;
+
+    footer.classList.remove('hidden');
+    document.body.classList.add('has-medal-footer');
+    setTimeout(function () { footer.classList.add('visible'); }, 100);
+
+    footer.onclick = function () {
+      currentSort = 'medals';
+      updateHash('medals');
+      syncSortButtons();
+      render();
+      track('medal_footer_click');
+    };
+  }
+
+  /**
+   * Render the full medals & results page.
+   * Medal winners featured at top, then all results by date.
+   * @param {HTMLElement} container - The schedule container element
+   */
+  function renderMedalsPage(container) {
+    var allResults = Results.getAllResults();
+    var counts = Results.getMedalCounts();
+    var totalMedals = counts.gold + counts.silver + counts.bronze;
+    var html = '<div class="medals-page">';
+
+    // Header with medal count circles
+    html += '<div class="medals-header">';
+    html += '<h2 class="medals-title">Park City at Milano Cortina 2026</h2>';
+    html += '<div class="medals-count-row">';
+    html += '<span class="medal-count-item"><span class="medal-circle medal-circle-gold medal-circle-lg">' + counts.gold + '</span><span class="medal-count-label">Gold</span></span>';
+    html += '<span class="medal-count-item"><span class="medal-circle medal-circle-silver medal-circle-lg">' + counts.silver + '</span><span class="medal-count-label">Silver</span></span>';
+    html += '<span class="medal-count-item"><span class="medal-circle medal-circle-bronze medal-circle-lg">' + counts.bronze + '</span><span class="medal-count-label">Bronze</span></span>';
+    html += '</div>';
+    html += '</div>';
+
+    // Medal winners section
+    var medalSections = [
+      { key: 'gold', emoji: '', label: 'Gold Medal', cssClass: 'medals-section-gold' },
+      { key: 'silver', emoji: '', label: 'Silver Medal', cssClass: 'medals-section-silver' },
+      { key: 'bronze', emoji: '', label: 'Bronze Medal', cssClass: 'medals-section-bronze' }
+    ];
+
+    var hasMedals = false;
+    medalSections.forEach(function (sec) {
+      var items = allResults[sec.key];
+      if (items.length === 0) return;
+      hasMedals = true;
+      html += '<div class="medals-section ' + sec.cssClass + '">';
+      html += '<h3 class="medals-section-header">' + sec.label + '</h3>';
+      items.forEach(function (item) {
+        html += '<div class="medal-winner-card">';
+        html += '<div class="medal-winner-name">' + escapeHTML(item.athlete) + '</div>';
+        html += '<div class="medal-winner-event">' + escapeHTML(item.sport) + ' — ' + escapeHTML(item.event) + '</div>';
+        if (item.date) {
+          html += '<div class="medal-winner-date">' + escapeHTML(formatDate(item.date)) + '</div>';
+        }
+        html += '</div>';
+      });
+      html += '</div>';
+    });
+
+    // All event results by date
+    var allItems = [].concat(allResults.gold, allResults.silver, allResults.bronze, allResults.other);
+
+    if (allItems.length > 0) {
+      // Group by date
+      var byDate = {};
+      allItems.forEach(function (item) {
+        var d = item.date || 'Unknown';
+        if (!byDate[d]) byDate[d] = [];
+        byDate[d].push(item);
+      });
+      var dates = Object.keys(byDate).sort();
+
+      html += '<div class="results-events-section">';
+      html += '<h3 class="results-events-header">Event Results</h3>';
+
+      dates.forEach(function (date) {
+        html += '<div class="results-date-group">';
+        html += '<h4 class="results-date-label">' + escapeHTML(formatDate(date)) + '</h4>';
+
+        // Group items within this date by event
+        var byEvent = {};
+        var eventOrder = [];
+        byDate[date].forEach(function (item) {
+          var key = item.sport + ' — ' + item.event;
+          if (!byEvent[key]) {
+            byEvent[key] = { sport: item.sport, event: item.event, athletes: [] };
+            eventOrder.push(key);
+          }
+          byEvent[key].athletes.push(item);
+        });
+
+        eventOrder.forEach(function (key) {
+          var evt = byEvent[key];
+          html += '<div class="results-event-card">';
+          html += '<div class="results-event-name">' + escapeHTML(evt.sport) + ' — ' + escapeHTML(evt.event) + '</div>';
+          html += '<div class="results-athletes">';
+          evt.athletes.forEach(function (item) {
+            var badgeCls = 'result-badge';
+            var lower = item.result.toLowerCase();
+            if (lower === 'gold') badgeCls += ' result-badge-gold';
+            else if (lower === 'silver') badgeCls += ' result-badge-silver';
+            else if (lower === 'bronze') badgeCls += ' result-badge-bronze';
+            else badgeCls += ' result-badge-other';
+            html += '<div class="results-athlete-row">';
+            html += '<span class="results-athlete-name">' + escapeHTML(item.athlete) + '</span>';
+            html += '<span class="' + badgeCls + '">' + escapeHTML(item.result) + '</span>';
+            html += '</div>';
+          });
+          html += '</div>';
+          html += '</div>';
+        });
+
+        html += '</div>';
+      });
+
+      html += '</div>';
+    }
+
+    if (allItems.length === 0) {
+      html += '<div class="medals-empty"><p>No results recorded yet. Check back as the Games unfold!</p></div>';
+    }
+
+    html += '</div>';
+    container.innerHTML = html;
+    window.scrollTo(0, 0);
+    postHeight();
+  }
 
   // Start on DOM ready
   if (document.readyState === 'loading') {

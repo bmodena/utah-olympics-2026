@@ -25,7 +25,19 @@
       "Bash(find:*)",
       "Bash(wc:*)",
       "WebFetch(domain:utah2026.townlift.com)",
-      "Bash(vercel --version:*)"
+      "Bash(vercel --version:*)",
+      "mcp__ide__getDiagnostics",
+      "Bash(git -C /Users/brianmodena/web/olympics/html ls-files:*)",
+      "Bash(git -C /Users/brianmodena/web/olympics rev-parse --show-toplevel)",
+      "Bash(git -C /Users/brianmodena/web/olympics/html rev-parse:*)",
+      "Bash(then)",
+      "Bash(echo:*)",
+      "Bash(elif echo \"$result\")",
+      "Bash(else)",
+      "Bash(fi:*)",
+      "Bash(done)",
+      "WebFetch(domain:www.fis-ski.com)",
+      "Bash(lsof:*)"
     ]
   }
 }

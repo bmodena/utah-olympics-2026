@@ -1037,6 +1037,57 @@ body {
   margin-bottom: 0.5rem;
 }
 
+.athlete-section-header {
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+  padding: 0.75rem 0 0.25rem;
+  border-bottom: 2px solid var(--border);
+  margin-bottom: 0.5rem;
+}
+
+.athlete-section-header:first-child {
+  padding-top: 0;
+}
+
+.athlete-completed-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem 0.5rem;
+  padding: 0.6rem 0.75rem;
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  border-left: 3px solid var(--park-city-accent);
+}
+
+.athlete-completed-name {
+  font-weight: 600;
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+.athlete-completed-results {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.15rem 0.35rem;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.athlete-completed-event {
+  white-space: nowrap;
+}
+
+.athlete-completed-sep {
+  color: var(--text-secondary);
+  opacity: 0.4;
+}
+
 .athlete-row {
   background: var(--bg-card);
   border-radius: var(--radius);
@@ -1393,7 +1444,12 @@ body {
     padding: 0.65rem 1rem;
   }
 
-  .athlete-row-name {
+  .athlete-completed-row {
+    padding: 0.65rem 1rem;
+  }
+
+  .athlete-row-name,
+  .athlete-completed-name {
     font-size: 1rem;
   }
 
@@ -1437,4 +1493,324 @@ body {
   .search-input {
     width: 220px;
   }
+}
+
+/* ===== Result Badges ===== */
+.result-badge {
+  display: inline-block;
+  padding: 0.15rem 0.45rem;
+  border-radius: 999px;
+  font-size: 0.6rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  line-height: 1.3;
+  vertical-align: middle;
+  margin-left: 0.35rem;
+}
+
+.result-badge-gold {
+  background: #ffd700;
+  color: #5a4800;
+}
+
+.result-badge-silver {
+  background: #c0c0c0;
+  color: #333;
+}
+
+.result-badge-bronze {
+  background: #cd7f32;
+  color: #fff;
+}
+
+.result-badge-other {
+  background: var(--border-color);
+  color: var(--text-primary);
+}
+
+.result-badge-inline {
+  font-size: 0.55rem;
+  padding: 0.1rem 0.35rem;
+  margin-left: 0.25rem;
+}
+
+.result-badge-pending {
+  background: transparent;
+  color: var(--text-secondary);
+  border: 1px dashed var(--text-secondary);
+  font-style: italic;
+  opacity: 0.7;
+}
+
+/* ===== Medal Footer ===== */
+.medal-footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 199;
+  background: linear-gradient(135deg, #1a1a2e 0%, #2d2d44 100%);
+  color: var(--text-light);
+  padding: 0.6rem 1rem;
+  box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.3);
+  transform: translateY(100%);
+  transition: transform 0.35s ease;
+  cursor: pointer;
+}
+
+.medal-footer.visible {
+  transform: translateY(0);
+}
+
+.medal-footer.hidden {
+  display: none;
+}
+
+.medal-footer-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.medal-footer-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  opacity: 0.9;
+  margin-right: 0.25rem;
+}
+
+.medal-footer-item {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.medal-circle {
+  width: 1.3rem;
+  height: 1.3rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.65rem;
+  font-weight: 700;
+}
+
+.medal-circle-gold {
+  background: #ffd700;
+  color: #5a4800;
+}
+
+.medal-circle-silver {
+  background: #c0c0c0;
+  color: #333;
+}
+
+.medal-circle-bronze {
+  background: #cd7f32;
+  color: #fff;
+}
+
+.medal-footer-view-all {
+  font-size: 0.7rem;
+  opacity: 0.7;
+  margin-left: auto;
+  white-space: nowrap;
+}
+
+body.has-medal-footer .cta-banner {
+  bottom: 3rem;
+}
+
+/* ===== Sort Button: Results variant ===== */
+.sort-btn-medals {
+  border-color: var(--olympic-blue);
+  color: var(--olympic-blue);
+  font-weight: 700;
+}
+
+.sort-btn-medals.active {
+  background: var(--olympic-blue);
+  color: var(--text-light);
+  border-color: var(--olympic-blue);
+}
+
+/* ===== Medals & Results Page ===== */
+.medals-page {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 0.5rem 0 2rem;
+}
+
+.medals-header {
+  text-align: center;
+  padding: 1.25rem 0 1rem;
+}
+
+.medals-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 0.75rem;
+}
+
+.medals-count-row {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.medal-count-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.medal-circle-lg {
+  width: 2.5rem;
+  height: 2.5rem;
+  font-size: 1.1rem;
+}
+
+.medal-count-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* Medal winner sections */
+.medals-section {
+  margin-bottom: 1.25rem;
+}
+
+.medals-section-header {
+  font-size: 0.95rem;
+  font-weight: 700;
+  padding-bottom: 0.4rem;
+  margin-bottom: 0.6rem;
+  border-bottom: 3px solid var(--border-color);
+}
+
+.medals-section-gold .medals-section-header {
+  border-bottom-color: #ffd700;
+}
+
+.medals-section-silver .medals-section-header {
+  border-bottom-color: #c0c0c0;
+}
+
+.medals-section-bronze .medals-section-header {
+  border-bottom-color: #cd7f32;
+}
+
+.medal-winner-card {
+  padding: 0.75rem;
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 0.5rem;
+}
+
+.medals-section-gold .medal-winner-card {
+  border-left: 4px solid #ffd700;
+}
+
+.medals-section-silver .medal-winner-card {
+  border-left: 4px solid #c0c0c0;
+}
+
+.medals-section-bronze .medal-winner-card {
+  border-left: 4px solid #cd7f32;
+}
+
+.medal-winner-name {
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--text-primary);
+  margin-bottom: 0.15rem;
+}
+
+.medal-winner-event {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+}
+
+.medal-winner-date {
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+  margin-top: 0.2rem;
+}
+
+/* Event results by date */
+.results-events-section {
+  margin-top: 1.75rem;
+  padding-top: 1.25rem;
+  border-top: 2px solid var(--border-color);
+}
+
+.results-events-header {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 1rem;
+}
+
+.results-date-group {
+  margin-bottom: 1.25rem;
+}
+
+.results-date-label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--olympic-blue);
+  margin-bottom: 0.5rem;
+}
+
+.results-event-card {
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  padding: 0.65rem 0.75rem;
+  margin-bottom: 0.4rem;
+}
+
+.results-event-name {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 0.35rem;
+}
+
+.results-athletes {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.results-athlete-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.results-athlete-name {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.medals-empty {
+  text-align: center;
+  padding: 2rem;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
 }

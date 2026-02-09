@@ -836,6 +836,7 @@ var Schedule = (function () {
       }
 
       return {
+        id: evt.id || '',
         date: evt.date,
         time: evt.time,
         sport: evt.sport,

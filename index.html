@@ -32,7 +32,7 @@
   <link rel="dns-prefetch" href="https://milano-cortina-2026-olympics-api.p.rapidapi.com">
   <link rel="dns-prefetch" href="https://docs.google.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css?v=18">
+  <link rel="stylesheet" href="css/styles.css?v=19">
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-T2RPDQ96M7"></script>
   <script>
@@ -99,6 +99,7 @@
           <button class="sort-btn active" data-sort="date">Date</button>
           <button class="sort-btn" data-sort="sport">Sport</button>
           <button class="sort-btn" data-sort="athlete">Athlete</button>
+          <button class="sort-btn sort-btn-medals" data-sort="medals">Results</button>
         </div>
         <button class="past-toggle" id="past-toggle">Show past events</button>
         <div class="search-group">
@@ -132,6 +133,10 @@
     </div>
   </footer>
 
+  <div class="medal-footer hidden" id="medal-footer">
+    <div class="medal-footer-content"></div>
+  </div>
+
   <div class="cta-banner hidden" id="cta-banner">
     <div class="cta-banner-content">
       <div class="cta-banner-text">
@@ -143,9 +148,10 @@
     </div>
   </div>
 
-  <script src="js/config.js?v=18" defer></script>
-  <script src="js/athletes.js?v=18" defer></script>
-  <script src="js/schedule.js?v=18" defer></script>
-  <script src="js/app.js?v=18" defer></script>
+  <script src="js/config.js?v=19" defer></script>
+  <script src="js/athletes.js?v=19" defer></script>
+  <script src="js/schedule.js?v=19" defer></script>
+  <script src="js/results.js?v=19" defer></script>
+  <script src="js/app.js?v=19" defer></script>
 </body>
 </html>
