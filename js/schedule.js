@@ -3,7 +3,7 @@
  * normalize events, apply broadcast rules, and match to Park City athletes.
  *
  * Data flow:
- *   1. Check localStorage cache (4h during Olympics, 24h otherwise)
+ *   1. Check localStorage cache (30min during Olympics, 24h otherwise)
  *   2. If stale → fetch from RapidAPI /events endpoint
  *   3. Normalize API response:
  *      a. Map API sport codes to display names
@@ -38,17 +38,20 @@ var Schedule = (function () {
   /** @type {string} localStorage key for cached broadcast rules */
   var BROADCAST_CACHE_KEY = 'utah_olympics_broadcast_v1';
 
+  /** @type {string} localStorage key for API refresh throttle timestamp */
+  var REFRESH_THROTTLE_KEY = 'utah_olympics_refresh_throttle';
+
   /**
    * Cache TTL: how long localStorage data is considered "fresh" before
    * we attempt a background API refresh.
    *
-   * 15 minutes during the Olympic competition window (Feb 6–22, 2026)
+   * 30 minutes during the Olympic competition window (Feb 6–22, 2026)
    * keeps data reasonably current without hammering the API.
    * 24 hours off-season since data rarely changes.
    *
    * IMPORTANT: This TTL does NOT block page load. The page always renders
    * immediately from cache or static fallback. Stale cache only triggers a
-   * background API call to update data for the NEXT page load.
+   * background API call (subject to the 1-hour refresh throttle).
    *
    * @returns {number} TTL in milliseconds
    */
@@ -56,8 +59,43 @@ var Schedule = (function () {
     var now = new Date();
     var start = new Date('2026-02-06T00:00:00');
     var end = new Date('2026-02-23T00:00:00');
-    if (now >= start && now <= end) return 15 * 60 * 1000; // 15 minutes
+    if (now >= start && now <= end) return 30 * 60 * 1000; // 30 minutes
     return 24 * 60 * 60 * 1000; // 24 hours
+  }
+
+  /**
+   * Check whether we're allowed to make an API call right now.
+   * Returns true if enough time has passed since the last API attempt.
+   *
+   * Throttle window: 1 hour during Olympics, 24 hours off-season.
+   * This is separate from the cache TTL — even if data is "stale",
+   * we won't hit the API more than once per throttle window.
+   *
+   * @returns {boolean} true if an API call is allowed
+   */
+  function canRefreshAPI() {
+    if (forceRefresh()) return true;
+    try {
+      var last = localStorage.getItem(REFRESH_THROTTLE_KEY);
+      if (!last) return true;
+      var now = new Date();
+      var start = new Date('2026-02-06T00:00:00');
+      var end = new Date('2026-02-23T00:00:00');
+      var throttle = (now >= start && now <= end)
+        ? 60 * 60 * 1000   // 1 hour during Olympics
+        : 24 * 60 * 60 * 1000; // 24 hours off-season
+      return (Date.now() - parseInt(last, 10)) > throttle;
+    } catch (e) { return true; }
+  }
+
+  /**
+   * Record that we just attempted an API call (successful or not).
+   * Resets the throttle timer.
+   */
+  function markRefreshAttempt() {
+    try {
+      localStorage.setItem(REFRESH_THROTTLE_KEY, String(Date.now()));
+    } catch (e) { /* ignore */ }
   }
 
   /**
@@ -535,11 +573,11 @@ var Schedule = (function () {
    *
    * Strategy (designed to minimize API calls under high traffic):
    *
-   *   1. FRESH CACHE → serve immediately, no API call at all
+   *   1. FRESH CACHE (< 30min) → serve immediately, no API call at all
    *   2. STALE CACHE → serve immediately, kick off background API refresh
-   *      for the next page load
+   *      for the next page load (throttled to once per hour max)
    *   3. NO CACHE → load from static data/schedule-cache.json (instant,
-   *      no API call), then kick off background API refresh
+   *      no API call), then kick off background refresh (throttled)
    *
    * The API is NEVER called synchronously in the page load path when cache
    * exists. This means even if the API is rate-limited or down, the page
@@ -618,6 +656,10 @@ var Schedule = (function () {
    * @param {string} apiKey - RapidAPI key
    */
   function backgroundRefresh(apiKey) {
+    // Throttle: only allow one API call per hour (during Olympics)
+    if (!canRefreshAPI()) return;
+    markRefreshAttempt();
+
     setTimeout(function () {
       var url = 'https://' + CONFIG.RAPIDAPI_HOST + '/events';
       fetch(url, {
