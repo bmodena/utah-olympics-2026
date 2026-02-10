@@ -1626,6 +1626,10 @@ body.has-medal-footer .cta-banner {
   bottom: 3rem;
 }
 
+body.has-medal-footer .site-footer {
+  padding-bottom: 3.5rem;
+}
+
 /* ===== Sort Button: Results variant ===== */
 .sort-btn-medals {
   border-color: var(--olympic-blue);
